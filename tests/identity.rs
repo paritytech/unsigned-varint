@@ -24,7 +24,7 @@ use unsigned_varint::{decode::{self, Error}, encode};
 
 #[test]
 fn identity_u8() {
-    let mut buf = [0; 2];
+    let mut buf = encode::u8_buffer();
     for n in 0 .. u8::MAX {
         assert_eq!(n, decode::u8(encode::u8(n, &mut buf)).unwrap().0)
     }
@@ -32,7 +32,7 @@ fn identity_u8() {
 
 #[test]
 fn identity_u16() {
-    let mut buf = [0; 3];
+    let mut buf = encode::u16_buffer();
     for n in 0 .. u16::MAX {
         assert_eq!(n, decode::u16(encode::u16(n, &mut buf)).unwrap().0)
     }
@@ -40,7 +40,7 @@ fn identity_u16() {
 
 #[test]
 fn identity_u32() {
-    let mut buf = [0; 5];
+    let mut buf = encode::u32_buffer();
     for n in 0 .. 1000_000 {
         assert_eq!(n, decode::u32(encode::u32(n, &mut buf)).unwrap().0)
     }
@@ -49,7 +49,7 @@ fn identity_u32() {
 
 #[test]
 fn identity_u64() {
-    let mut buf = [0; 10];
+    let mut buf = encode::u64_buffer();
     for n in 0 .. 1000_000 {
         assert_eq!(n, decode::u64(encode::u64(n, &mut buf)).unwrap().0)
     }
@@ -58,7 +58,7 @@ fn identity_u64() {
 
 #[test]
 fn identity_u128() {
-    let mut buf = [0; 19];
+    let mut buf = encode::u128_buffer();
     for n in 0 .. 1000_000 {
         assert_eq!(n, decode::u128(encode::u128(n, &mut buf)).unwrap().0)
     }

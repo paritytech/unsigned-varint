@@ -31,11 +31,12 @@ macro_rules! encode {
     }}
 }
 
+
 /// Encode the given `u8` into the given byte array.
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u8(number: u8, buf: &mut [u8; 2]) -> &[u8] {
+pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
     encode!(number, 8, buf)
 }
 
@@ -43,7 +44,7 @@ pub fn u8(number: u8, buf: &mut [u8; 2]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u16(number: u16, buf: &mut [u8; 3]) -> &[u8] {
+pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
     encode!(number, 16, buf)
 }
 
@@ -51,7 +52,7 @@ pub fn u16(number: u16, buf: &mut [u8; 3]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u32(number: u32, buf: &mut [u8; 5]) -> &[u8] {
+pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
     encode!(number, 32, buf)
 }
 
@@ -59,7 +60,7 @@ pub fn u32(number: u32, buf: &mut [u8; 5]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u64(number: u64, buf: &mut [u8; 10]) -> &[u8] {
+pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
     encode!(number, 64, buf)
 }
 
@@ -67,7 +68,7 @@ pub fn u64(number: u64, buf: &mut [u8; 10]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u128(number: u128, buf: &mut [u8; 19]) -> &[u8] {
+pub fn u128(number: u128, buf: &mut [u8; U128_LEN]) -> &[u8] {
     encode!(number, 128, buf)
 }
 
@@ -76,7 +77,7 @@ pub fn u128(number: u128, buf: &mut [u8; 19]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 #[cfg(target_pointer_width = "64")]
-pub fn usize(number: usize, buf: &mut [u8; 10]) -> &[u8] {
+pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
     u64(number as u64, buf)
 }
 
@@ -85,7 +86,58 @@ pub fn usize(number: usize, buf: &mut [u8; 10]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 #[cfg(target_pointer_width = "32")]
-pub fn usize(number: usize, buf: &mut [u8; 5]) -> &[u8] {
+pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
     u32(number as u32, buf)
 }
+
+/// Create new array buffer for encoding of `u8` values.
+#[inline]
+pub fn u8_buffer() -> [u8; U8_LEN] {
+    [0; U8_LEN]
+}
+
+/// Create new array buffer for encoding of `u16` values.
+#[inline]
+pub fn u16_buffer() -> [u8; U16_LEN] {
+    [0; U16_LEN]
+}
+
+/// Create new array buffer for encoding of `u32` values.
+#[inline]
+pub fn u32_buffer() -> [u8; U32_LEN] {
+    [0; U32_LEN]
+}
+
+/// Create new array buffer for encoding of `u64` values.
+#[inline]
+pub fn u64_buffer() -> [u8; U64_LEN] {
+    [0; U64_LEN]
+}
+
+/// Create new array buffer for encoding of `u128` values.
+#[inline]
+pub fn u128_buffer() -> [u8; U128_LEN] {
+    [0; U128_LEN]
+}
+
+/// Create new array buffer for encoding of `usize` values.
+#[inline]
+pub fn usize_buffer() -> [u8; USIZE_LEN] {
+    [0; USIZE_LEN]
+}
+
+
+// Required lengths of encoding buffers:
+
+const U8_LEN: usize = 2;
+const U16_LEN: usize = 3;
+const U32_LEN: usize = 5;
+const U64_LEN: usize = 10;
+const U128_LEN: usize = 19;
+
+#[cfg(target_pointer_width = "64")]
+const USIZE_LEN: usize = U64_LEN;
+
+#[cfg(target_pointer_width = "32")]
+const USIZE_LEN: usize = U32_LEN;
 

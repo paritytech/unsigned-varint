@@ -60,17 +60,12 @@ macro_rules! encoder_decoder_impls {
     }
 }
 
-encoder_decoder_impls!(u8, encode::u8, decode::u8, [0; 2]);
-encoder_decoder_impls!(u16, encode::u16, decode::u16, [0; 3]);
-encoder_decoder_impls!(u32, encode::u32, decode::u32, [0; 5]);
-encoder_decoder_impls!(u64, encode::u64, decode::u64, [0; 10]);
-encoder_decoder_impls!(u128, encode::u128, decode::u128, [0; 19]);
-
-#[cfg(target_pointer_width = "64")]
-encoder_decoder_impls!(usize, encode::usize, decode::usize, [0; 10]);
-
-#[cfg(target_pointer_width = "32")]
-encoder_decoder_impls!(usize, encode::usize, decode::usize, [0; 5]);
+encoder_decoder_impls!(u8, encode::u8, decode::u8, encode::u8_buffer());
+encoder_decoder_impls!(u16, encode::u16, decode::u16, encode::u16_buffer());
+encoder_decoder_impls!(u32, encode::u32, decode::u32, encode::u32_buffer());
+encoder_decoder_impls!(u64, encode::u64, decode::u64, encode::u64_buffer());
+encoder_decoder_impls!(u128, encode::u128, decode::u128, encode::u128_buffer());
+encoder_decoder_impls!(usize, encode::usize, decode::usize, encode::usize_buffer());
 
 
 /// tokio-codec based encoder + decoder of unsigned-varint, length-prefixed bytes
