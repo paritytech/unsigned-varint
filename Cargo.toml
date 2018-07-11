@@ -1,0 +1,13 @@
+[package]
+name = "unsigned-varint"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+license = "MIT"
+
+[features]
+codec = ["bytes", "tokio-codec"]
+
+[dependencies]
+bytes = { version = "0.4", optional = true }
+quick-error = "1"
+tokio-codec = { version = "0.1", optional = true }
