@@ -35,12 +35,12 @@ quick_error! {
 
 macro_rules! decode {
     ($buf:expr, $max_bytes:expr, $typ:ident) => {{
-        let mut num = 0;
-        for (i, byte) in $buf.iter().enumerate() {
-            let n = $typ::from(byte & 0x7F);
-            num |= n << i * 7;
-            if byte & 0x80 == 0 {
-                return Ok((num, i + 1))
+        let mut n = 0;
+        for (i, b) in $buf.iter().enumerate() {
+            let k = $typ::from(b & 0x7F);
+            n |= k << (i * 7);
+            if b & 0x80 == 0 {
+                return Ok((n, i + 1))
             }
             if i == $max_bytes {
                 return Err(Error::Overflow)

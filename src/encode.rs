@@ -17,17 +17,20 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-use std::cmp::max;
-
 macro_rules! encode {
-    ($number:expr, $width:expr, $buf:expr) => {{
-        let bits = $width - $number.leading_zeros() as usize;
-        let len = max(1, (bits as f32 / 7.0).ceil() as usize);
-        for (i, byte) in $buf.iter_mut().enumerate().take(len) {
-            *byte = ($number >> i * 7) as u8 | 0x80
+    ($number:expr, $buf:expr) => {{
+        let mut n = $number;
+        let mut i = 0;
+        for b in $buf.iter_mut() {
+            *b = n as u8 | 0x80;
+            n >>= 7;
+            if n == 0 {
+                *b &= 0x7f;
+                break
+            }
+            i += 1
         }
-        $buf[len - 1] &= 0x7F;
-        &$buf[0..len]
+        &$buf[0..=i]
     }}
 }
 
@@ -37,7 +40,7 @@ macro_rules! encode {
 /// Returns the slice of encoded bytes.
 #[inline]
 pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
-    encode!(number, 8, buf)
+    encode!(number, buf)
 }
 
 /// Encode the given `u16` into the given byte array.
@@ -45,7 +48,7 @@ pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
-    encode!(number, 16, buf)
+    encode!(number, buf)
 }
 
 /// Encode the given `u32` into the given byte array.
@@ -53,7 +56,7 @@ pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
-    encode!(number, 32, buf)
+    encode!(number, buf)
 }
 
 /// Encode the given `u64` into the given byte array.
@@ -61,7 +64,7 @@ pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
-    encode!(number, 64, buf)
+    encode!(number, buf)
 }
 
 /// Encode the given `u128` into the given byte array.
@@ -69,7 +72,7 @@ pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 pub fn u128(number: u128, buf: &mut [u8; U128_LEN]) -> &[u8] {
-    encode!(number, 128, buf)
+    encode!(number, buf)
 }
 
 /// Encode the given `usize` into the given byte array.
