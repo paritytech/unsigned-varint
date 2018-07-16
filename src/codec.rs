@@ -120,6 +120,8 @@ impl<T> Decoder for UviBytes<T> {
                 }
                 Some(n) => {
                     if src.len() < n {
+                        let add = n - src.len();
+                        src.reserve(add);
                         self.len = Some(n);
                         return Ok(None)
                     } else {
