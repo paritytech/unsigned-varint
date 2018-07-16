@@ -47,14 +47,14 @@ macro_rules! encoder_decoder_impls {
             type Error = io::Error;
 
             fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-                match $dec(src.as_ref()) {
-                    Ok((n, i)) => {
-                        src.split_to(i);
-                        Ok(Some(n))
-                    }
-                    Err(Error::Insufficient) => Ok(None),
-                    Err(e) => Err(io::Error::new(io::ErrorKind::Other, e))
-                }
+                let (number, consumed) =
+                    match $dec(src.as_ref()) {
+                        Ok((n, rem)) => (n, src.len() - rem.len()),
+                        Err(Error::Insufficient) => return Ok(None),
+                        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e))
+                    };
+                src.split_to(consumed);
+                Ok(Some(number))
             }
         }
     }
