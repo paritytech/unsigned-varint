@@ -70,6 +70,8 @@ encoder_decoder_impls!(usize, encode::usize, decode::usize, encode::usize_buffer
 
 /// tokio-codec based encoder + decoder of unsigned-varint, length-prefixed bytes
 pub struct UviBytes<T = Bytes> {
+    /// the variable-length integer encoder/decoder
+    varint_codec: Uvi<usize>,
     /// number of bytes expected in the current frame (for decoding only)
     len: Option<usize>,
     // maximum permitted number of bytes per frame
@@ -79,7 +81,7 @@ pub struct UviBytes<T = Bytes> {
 
 impl<T> Default for UviBytes<T> {
     fn default() -> Self {
-        Self { len: None, max: usize::MAX, _ty: PhantomData }
+        Self { varint_codec: Default::default(), len: None, max: usize::MAX, _ty: PhantomData }
     }
 }
 
@@ -99,7 +101,7 @@ impl<T: IntoBuf> Encoder for UviBytes<T> {
         if bytes.len() > self.max {
             return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
         }
-        Uvi::<usize>::default().encode(bytes.remaining(), dst)?;
+        self.varint_codec.encode(bytes.remaining(), dst)?;
         dst.reserve(bytes.remaining());
         dst.put(bytes);
         Ok(())
@@ -114,7 +116,7 @@ impl<T> Decoder for UviBytes<T> {
         loop {
             match self.len.take() {
                 None => {
-                    self.len = Uvi::<usize>::default().decode(src)?;
+                    self.len = self.varint_codec.decode(src)?;
                     if self.len.is_none() {
                         return Ok(None)
                     }
