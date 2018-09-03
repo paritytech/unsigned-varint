@@ -70,8 +70,10 @@ encoder_decoder_impls!(usize, encode::usize, decode::usize, encode::usize_buffer
 
 /// tokio-codec based encoder + decoder of unsigned-varint, length-prefixed bytes
 pub struct UviBytes<T = Bytes> {
-    len: Option<usize>, // number of bytes (for decoding only)
-    max: usize, // max. number of bytes (for decoding only)
+    /// number of bytes expected in the current frame (for decoding only)
+    len: Option<usize>,
+    // maximum permitted number of bytes per frame
+    max: usize,
     _ty: PhantomData<T>
 }
 
