@@ -94,6 +94,9 @@ impl<T: IntoBuf> Encoder for UviBytes<T> {
 
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
         let bytes = item.into_buf();
+        if bytes.len() > self.max {
+            return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
+        }
         Uvi::<usize>::default().encode(bytes.remaining(), dst)?;
         dst.reserve(bytes.remaining());
         dst.put(bytes);
