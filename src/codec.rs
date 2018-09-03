@@ -98,7 +98,7 @@ impl<T: IntoBuf> Encoder for UviBytes<T> {
 
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
         let bytes = item.into_buf();
-        if bytes.len() > self.max {
+        if bytes.remaining() > self.max {
             return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
         }
         self.varint_codec.encode(bytes.remaining(), dst)?;
