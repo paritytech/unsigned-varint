@@ -35,7 +35,7 @@ impl fmt::Display for Error {
         match self {
             Error::Insufficient => f.write_str("not enough input bytes"),
             Error::Overflow => f.write_str("input bytes exceed maximum"),
-            _ => f.write_str("__Nonexhaustive")
+            Error::__Nonexhaustive => f.write_str("__Nonexhaustive")
         }
     }
 }
