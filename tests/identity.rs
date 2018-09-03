@@ -18,7 +18,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 extern crate unsigned_varint;
+extern crate quickcheck;
 
+use quickcheck::QuickCheck;
 use std::{u8, u16, u32, u64, u128};
 use unsigned_varint::{decode::{self, Error}, encode};
 
@@ -63,6 +65,19 @@ fn identity_u128() {
         assert_eq!(n, decode::u128(encode::u128(n, &mut buf)).unwrap().0)
     }
     assert_eq!(u128::MAX, decode::u128(encode::u128(u128::MAX, &mut buf)).unwrap().0)
+}
+
+#[test]
+fn identity() {
+    fn prop(n: u64) -> bool {
+        let mut buf = encode::u64_buffer();
+        Ok(n) == decode::u64(encode::u64(n, &mut buf)).map(|r| r.0)
+    }
+    QuickCheck::new()
+        .tests(1_000_000)
+        .min_tests_passed(1_000_000)
+        .max_tests(1_000_000)
+        .quickcheck(prop as fn(u64) -> bool)
 }
 
 #[test]
