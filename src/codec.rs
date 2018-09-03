@@ -81,7 +81,12 @@ pub struct UviBytes<T = Bytes> {
 
 impl<T> Default for UviBytes<T> {
     fn default() -> Self {
-        Self { varint_codec: Default::default(), len: None, max: usize::MAX, _ty: PhantomData }
+        Self {
+            varint_codec: Default::default(),
+            len: None,
+            max: 128 * 1024 * 1024,
+            _ty: PhantomData
+        }
     }
 }
 
