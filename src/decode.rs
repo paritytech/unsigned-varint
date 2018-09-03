@@ -17,21 +17,30 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-quick_error! {
-    #[derive(Debug, PartialEq, Eq)]
-    pub enum Error {
-        /// Not enough input bytes.
-        Insufficient {
-            display("not enough input bytes")
+use std::{self, fmt};
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+    /// Not enough input bytes.
+    Insufficient,
+    /// Input bytes exceed maximum.
+    Overflow,
+
+    #[doc(hidden)]
+    __Nonexhaustive
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::Insufficient => f.write_str("not enough input bytes"),
+            Error::Overflow => f.write_str("input bytes exceed maximum"),
+            Error::__Nonexhaustive => f.write_str("__Nonexhaustive")
         }
-        /// Input bytes exceed maximum.
-        Overflow {
-            display("input bytes exceed maximum")
-        }
-        #[doc(hidden)]
-        __Nonexhaustive
     }
 }
+
+impl std::error::Error for Error {}
 
 macro_rules! decode {
     ($buf:expr, $max_bytes:expr, $typ:ident) => {{

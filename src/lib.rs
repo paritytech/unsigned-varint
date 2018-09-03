@@ -21,9 +21,6 @@
 //! significant bit (MSB) in each byte indicates if another byte follows
 //! (MSB = 1), or not (MSB = 0).
 
-#[macro_use]
-extern crate quick_error;
-
 pub mod decode;
 pub mod encode;
 
