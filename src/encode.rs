@@ -30,6 +30,7 @@ macro_rules! encode {
             }
             i += 1
         }
+        debug_assert_eq!(n, 0);
         &$buf[0..=i]
     }}
 }
