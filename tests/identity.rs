@@ -17,8 +17,10 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-extern crate unsigned_varint;
+extern crate bytes;
 extern crate quickcheck;
+extern crate tokio_codec;
+extern crate unsigned_varint;
 
 use quickcheck::QuickCheck;
 use std::{u8, u16, u32, u64, u128};
@@ -102,4 +104,25 @@ fn various() {
         0xFFFFFFFFFFFFFFFF,
         decode::u64(&[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 1]).unwrap().0
     )
+}
+
+#[cfg(feature = "codec")]
+#[test]
+fn identity_codec() {
+    use bytes::{Bytes, BytesMut};
+    use quickcheck::StdThreadGen;
+    use tokio_codec::{Encoder, Decoder};
+    use unsigned_varint::codec::UviBytes;
+
+    fn prop(mut xs: Vec<u8>) -> bool {
+        let mut codec = UviBytes::default();
+        xs.truncate(codec.max_len());
+        let input = Bytes::from(xs);
+        let mut buffer = BytesMut::with_capacity(input.len());
+        assert!(codec.encode(input.clone(), &mut buffer).is_ok());
+        input == codec.decode(&mut buffer).expect("Ok").expect("Some").freeze()
+    }
+
+    QuickCheck::with_gen(StdThreadGen::new(512 * 1024))
+        .quickcheck(prop as fn(Vec<u8>) -> bool)
 }

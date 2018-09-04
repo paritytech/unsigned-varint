@@ -16,4 +16,6 @@ tokio-codec = { version = "0.1", optional = true }
 
 [dev-dependencies]
 quickcheck = "0.7"
+bytes = "0.4"
+tokio-codec = "0.1"
 
