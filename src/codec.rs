@@ -95,6 +95,11 @@ impl<T> UviBytes<T> {
     pub fn set_max_len(&mut self, val: usize) {
         self.max = val
     }
+
+    /// Return the maximum allowed number of bytes to encode/decode.
+    pub fn max_len(&self) -> usize {
+        self.max
+    }
 }
 
 impl<T: IntoBuf> Encoder for UviBytes<T> {
