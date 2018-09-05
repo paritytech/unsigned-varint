@@ -26,7 +26,7 @@ use tokio_codec::{Encoder, Decoder};
 
 /// tokio-codec based encoder + decoder of unsigned-varint values
 #[derive(Default)]
-pub struct Uvi<T>(PhantomData<*const T>);
+pub struct Uvi<T>(PhantomData<T>);
 
 // Implement tokio-codec `Encoder` + `Decoder` traits for unsigned integers.
 macro_rules! encoder_decoder_impls {
