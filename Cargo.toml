@@ -6,6 +6,7 @@ license = "MIT"
 description = "unsigned varint encoding"
 repository = "https://github.com/paritytech/unsigned-varint"
 readme = "README.md"
+edition = "2018"
 
 [features]
 codec = ["bytes", "tokio-codec"]

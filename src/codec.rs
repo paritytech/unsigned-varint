@@ -18,8 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use bytes::{Buf, BufMut, Bytes, BytesMut, IntoBuf};
-use encode;
-use decode::{self, Error};
+use crate::{encode, decode::{self, Error}};
 use std::{io, marker::PhantomData, usize};
 use tokio_codec::{Encoder, Decoder};
 

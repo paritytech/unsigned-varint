@@ -23,12 +23,5 @@
 
 pub mod decode;
 pub mod encode;
-
-#[cfg(feature = "codec")]
-extern crate tokio_codec;
-
-#[cfg(feature = "codec")]
-extern crate bytes;
-
 #[cfg(feature = "codec")]
 pub mod codec;
