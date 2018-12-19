@@ -17,11 +17,6 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-extern crate bytes;
-extern crate quickcheck;
-extern crate tokio_codec;
-extern crate unsigned_varint;
-
 use quickcheck::QuickCheck;
 use std::{u8, u16, u32, u64, u128};
 use unsigned_varint::{decode::{self, Error}, encode};
