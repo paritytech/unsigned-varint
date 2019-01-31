@@ -1,12 +1,15 @@
 [package]
 name = "unsigned-varint"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "MIT"
 description = "unsigned varint encoding"
 repository = "https://github.com/paritytech/unsigned-varint"
 readme = "README.md"
 edition = "2018"
+
+[package.metadata.docs.rs]
+all-features = true
 
 [features]
 codec = ["bytes", "tokio-codec"]

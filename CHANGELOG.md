@@ -1,3 +1,7 @@
+# 0.2.2 [2019-01-31]
+
+- Add package metadata for docs.rs to generate documentation for all features.
+
 # 0.2.1 [2018-09-05]
 
 - Ensure `codec::Uvi<T>` is `Send` when `T` is.
