@@ -17,41 +17,28 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#![feature(test)]
-
-extern crate test;
-extern crate unsigned_varint;
-
-#[cfg(feature = "codec")]
-extern crate bytes;
-#[cfg(feature = "codec")]
-extern crate tokio_codec;
-
+use criterion::{criterion_group, criterion_main, Criterion};
 use std::u64;
-use test::Bencher;
 use unsigned_varint::{decode, encode};
 
-#[bench]
-fn bench_decode(b: &mut Bencher) {
+fn bench_decode(c: &mut Criterion) {
     let mut buf = [0; 10];
-    let bytes = encode::u64(u64::MAX, &mut buf);
-    b.iter(|| {
-        assert_eq!(u64::MAX, decode::u64(bytes).unwrap().0)
-    });
+    let len = encode::u64(u64::MAX, &mut buf).len();
+    c.bench_function("decode", move |b| b.iter(|| {
+        assert_eq!(u64::MAX, decode::u64(&buf[.. len]).unwrap().0)
+    }));
 }
 
-#[bench]
-fn bench_encode(b: &mut Bencher) {
+fn bench_encode(c: &mut Criterion) {
     let mut buf = [0; 10];
     let encoded = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 1];
-    b.iter(|| {
+    c.bench_function("encode", move |b| b.iter(|| {
         assert_eq!(&encoded, encode::u64(u64::MAX, &mut buf));
-    });
+    }));
 }
 
 #[cfg(feature = "codec")]
-#[bench]
-fn bench_codec(b: &mut Bencher) {
+fn bench_codec(c: &mut Criterion) {
     use bytes::{Bytes, BytesMut};
     use tokio_codec::{Decoder, Encoder};
     use unsigned_varint::codec::UviBytes;
@@ -60,9 +47,17 @@ fn bench_codec(b: &mut Bencher) {
     let mut bytes = BytesMut::with_capacity(9000);
     let mut uvi_bytes = UviBytes::default();
 
-    b.iter(move || {
+    c.bench_function("codec", move |b| b.iter(|| {
         uvi_bytes.encode(data.clone(), &mut bytes).unwrap();
         assert_eq!(data, uvi_bytes.decode(&mut bytes.take()).unwrap().unwrap())
-    });
+    }));
 }
+
+#[cfg(feature = "codec")]
+criterion_group!(benches, bench_encode, bench_decode, bench_codec);
+
+#[cfg(not(feature = "codec"))]
+criterion_group!(benches, bench_encode, bench_decode);
+
+criterion_main!(benches);
 

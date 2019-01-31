@@ -20,7 +20,11 @@ tokio-codec = { version = "0.1", optional = true }
 
 [dev-dependencies]
 bytes = "0.4"
+criterion = "0.2"
 hex = "0.3"
-quickcheck = "0.7"
+quickcheck = "0.8"
 tokio-codec = "0.1"
 
+[[bench]]
+name = "benchmark"
+harness = false
