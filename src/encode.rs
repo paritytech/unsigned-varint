@@ -40,7 +40,7 @@ macro_rules! encode {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
+pub fn u8(number: u8, buf: &mut [u8; U8_BUF_LEN]) -> &[u8] {
     encode!(number, buf)
 }
 
@@ -48,7 +48,7 @@ pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
+pub fn u16(number: u16, buf: &mut [u8; U16_BUF_LEN]) -> &[u8] {
     encode!(number, buf)
 }
 
@@ -56,7 +56,7 @@ pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
+pub fn u32(number: u32, buf: &mut [u8; U32_BUF_LEN]) -> &[u8] {
     encode!(number, buf)
 }
 
@@ -64,7 +64,7 @@ pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
+pub fn u64(number: u64, buf: &mut [u8; U64_BUF_LEN]) -> &[u8] {
     encode!(number, buf)
 }
 
@@ -72,7 +72,7 @@ pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
 ///
 /// Returns the slice of encoded bytes.
 #[inline]
-pub fn u128(number: u128, buf: &mut [u8; U128_LEN]) -> &[u8] {
+pub fn u128(number: u128, buf: &mut [u8; U128_BUF_LEN]) -> &[u8] {
     encode!(number, buf)
 }
 
@@ -81,7 +81,7 @@ pub fn u128(number: u128, buf: &mut [u8; U128_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 #[cfg(target_pointer_width = "64")]
-pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
+pub fn usize(number: usize, buf: &mut [u8; USIZE_BUF_LEN]) -> &[u8] {
     u64(number as u64, buf)
 }
 
@@ -90,58 +90,66 @@ pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
 /// Returns the slice of encoded bytes.
 #[inline]
 #[cfg(target_pointer_width = "32")]
-pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
+pub fn usize(number: usize, buf: &mut [u8; USIZE_BUF_LEN]) -> &[u8] {
     u32(number as u32, buf)
 }
 
 /// Create new array buffer for encoding of `u8` values.
 #[inline]
-pub fn u8_buffer() -> [u8; U8_LEN] {
-    [0; U8_LEN]
+pub fn u8_buffer() -> [u8; U8_BUF_LEN] {
+    [0; U8_BUF_LEN]
 }
 
 /// Create new array buffer for encoding of `u16` values.
 #[inline]
-pub fn u16_buffer() -> [u8; U16_LEN] {
-    [0; U16_LEN]
+pub fn u16_buffer() -> [u8; U16_BUF_LEN] {
+    [0; U16_BUF_LEN]
 }
 
 /// Create new array buffer for encoding of `u32` values.
 #[inline]
-pub fn u32_buffer() -> [u8; U32_LEN] {
-    [0; U32_LEN]
+pub fn u32_buffer() -> [u8; U32_BUF_LEN] {
+    [0; U32_BUF_LEN]
 }
 
 /// Create new array buffer for encoding of `u64` values.
 #[inline]
-pub fn u64_buffer() -> [u8; U64_LEN] {
-    [0; U64_LEN]
+pub fn u64_buffer() -> [u8; U64_BUF_LEN] {
+    [0; U64_BUF_LEN]
 }
 
 /// Create new array buffer for encoding of `u128` values.
 #[inline]
-pub fn u128_buffer() -> [u8; U128_LEN] {
-    [0; U128_LEN]
+pub fn u128_buffer() -> [u8; U128_BUF_LEN] {
+    [0; U128_BUF_LEN]
 }
 
 /// Create new array buffer for encoding of `usize` values.
 #[inline]
-pub fn usize_buffer() -> [u8; USIZE_LEN] {
-    [0; USIZE_LEN]
+pub fn usize_buffer() -> [u8; USIZE_BUF_LEN] {
+    [0; USIZE_BUF_LEN]
 }
 
+/// Required buffer length to encode a `u8`.
+pub const U8_BUF_LEN: usize = 2;
 
-// Required lengths of encoding buffers:
+/// Required buffer length to encode a `u16`.
+pub const U16_BUF_LEN: usize = 3;
 
-const U8_LEN: usize = 2;
-const U16_LEN: usize = 3;
-const U32_LEN: usize = 5;
-const U64_LEN: usize = 10;
-const U128_LEN: usize = 19;
+/// Required buffer length to encode a `u32`.
+pub const U32_BUF_LEN: usize = 5;
 
+/// Required buffer length to encode a `u64`.
+pub const U64_BUF_LEN: usize = 10;
+
+/// Required buffer length to encode a `u128`.
+pub const U128_BUF_LEN: usize = 19;
+
+/// Required buffer length to encode a `usize`.
 #[cfg(target_pointer_width = "64")]
-const USIZE_LEN: usize = U64_LEN;
+pub const USIZE_BUF_LEN: usize = U64_BUF_LEN;
 
+/// Required buffer length to encode a `usize`.
 #[cfg(target_pointer_width = "32")]
-const USIZE_LEN: usize = U32_LEN;
+pub const USIZE_BUF_LEN: usize = U32_BUF_LEN;
 

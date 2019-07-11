@@ -21,7 +21,11 @@
 //! significant bit (MSB) in each byte indicates if another byte follows
 //! (MSB = 1), or not (MSB = 0).
 
+#![feature(async_await)]
+
 pub mod decode;
 pub mod encode;
+
 #[cfg(feature = "codec")]
 pub mod codec;
+

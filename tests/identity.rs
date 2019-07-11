@@ -101,23 +101,3 @@ fn various() {
     )
 }
 
-#[cfg(feature = "codec")]
-#[test]
-fn identity_codec() {
-    use bytes::{Bytes, BytesMut};
-    use quickcheck::StdThreadGen;
-    use tokio_codec::{Encoder, Decoder};
-    use unsigned_varint::codec::UviBytes;
-
-    fn prop(mut xs: Vec<u8>) -> bool {
-        let mut codec = UviBytes::default();
-        xs.truncate(codec.max_len());
-        let input = Bytes::from(xs);
-        let mut buffer = BytesMut::with_capacity(input.len());
-        assert!(codec.encode(input.clone(), &mut buffer).is_ok());
-        input == codec.decode(&mut buffer).expect("Ok").expect("Some").freeze()
-    }
-
-    QuickCheck::with_gen(StdThreadGen::new(512 * 1024))
-        .quickcheck(prop as fn(Vec<u8>) -> bool)
-}

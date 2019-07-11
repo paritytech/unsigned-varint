@@ -17,6 +17,8 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#![feature(async_await)]
+
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::u64;
 use unsigned_varint::{decode, encode};
@@ -39,17 +41,24 @@ fn bench_encode(c: &mut Criterion) {
 
 #[cfg(feature = "codec")]
 fn bench_codec(c: &mut Criterion) {
-    use bytes::{Bytes, BytesMut};
-    use tokio_codec::{Decoder, Encoder};
-    use unsigned_varint::codec::UviBytes;
+    use futures::{executor::block_on, prelude::*};
+    use unsigned_varint::codec;
 
-    let data = Bytes::from(vec![1; 8192]);
-    let mut bytes = BytesMut::with_capacity(9000);
-    let mut uvi_bytes = UviBytes::default();
+    let data = vec![1; 8192];
+    let mut io = std::io::Cursor::new(vec![0; 9000]);
 
     c.bench_function("codec", move |b| b.iter(|| {
-        uvi_bytes.encode(data.clone(), &mut bytes).unwrap();
-        assert_eq!(data, uvi_bytes.decode(&mut bytes.take()).unwrap().unwrap())
+        io.set_position(0);
+        let result: Vec<u8> = block_on(async {
+            codec::usize::write(data.len(), &mut io).await.expect("encode len");
+            io.write_all(&data).await.expect("encode data");
+            io.set_position(0);
+            let n = codec::usize::read(&mut io).await.expect("decode len");
+            let mut xs = vec![0; n];
+            io.read_exact(&mut xs).await.expect("decode data");
+            xs
+        });
+        assert_eq!(data, result)
     }));
 }
 
