@@ -41,6 +41,15 @@ macro_rules! encoder_decoder_impls {
             }
         }
 
+        impl futures_codec::Encoder for Uvi<$typ> {
+            type Item = <Self as Encoder>::Item;
+            type Error = <Self as Encoder>::Error;
+
+            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+                Encoder::encode(self, item, dst)
+            }
+        }
+
         impl Decoder for Uvi<$typ> {
             type Item = $typ;
             type Error = io::Error;
@@ -54,6 +63,15 @@ macro_rules! encoder_decoder_impls {
                     };
                 src.split_to(consumed);
                 Ok(Some(number))
+            }
+        }
+
+        impl futures_codec::Decoder for Uvi<$typ> {
+            type Item = <Self as Decoder>::Item;
+            type Error = <Self as Decoder>::Error;
+
+            fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+                Decoder::decode(self, src)
             }
         }
     }
