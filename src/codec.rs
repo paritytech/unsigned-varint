@@ -117,6 +117,15 @@ impl<T: IntoBuf> Encoder for UviBytes<T> {
     }
 }
 
+impl<T: IntoBuf> futures_codec::Encoder for UviBytes<T> {
+    type Item = <Self as Encoder>::Item;
+    type Error = <Self as Encoder>::Error;
+
+    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        Encoder::encode(self, item, dst)
+    }
+}
+
 impl<T> Decoder for UviBytes<T> {
     type Item = BytesMut;
     type Error = io::Error;
@@ -149,4 +158,11 @@ impl<T> Decoder for UviBytes<T> {
     }
 }
 
+impl<T: IntoBuf> futures_codec::Decoder for UviBytes<T> {
+    type Item = <Self as Decoder>::Item;
+    type Error = <Self as Decoder>::Error;
 
+    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+        Decoder::decode(self, src)
+    }
+}

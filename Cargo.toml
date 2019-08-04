@@ -12,11 +12,12 @@ edition = "2018"
 all-features = true
 
 [features]
-codec = ["bytes", "tokio-codec"]
+codec = ["bytes", "tokio-codec", "futures_codec"]
 
 [dependencies]
 bytes = { version = "0.4", optional = true }
 tokio-codec = { version = "0.1", optional = true }
+futures_codec = { version = "0.2.5", optional = true }
 
 [dev-dependencies]
 bytes = "0.4"
