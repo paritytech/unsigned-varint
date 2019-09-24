@@ -1,6 +1,6 @@
 [package]
 name = "unsigned-varint"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "MIT"
 description = "unsigned varint encoding"
@@ -13,17 +13,19 @@ all-features = true
 
 [features]
 codec = ["bytes", "tokio-codec"]
+futures-codec = ["bytes", "futures_codec"]
 
 [dependencies]
-bytes = { version = "0.4", optional = true }
-tokio-codec = { version = "0.1", optional = true }
+bytes = { version = "0.4.12", optional = true }
+tokio-codec = { version = "0.1.1", optional = true }
+futures_codec = { version = "0.2.5", optional = true }
 
 [dev-dependencies]
-bytes = "0.4"
-criterion = "0.2"
-hex = "0.3"
-quickcheck = "0.8"
-tokio-codec = "0.1"
+bytes = "0.4.12"
+criterion = "0.3.0"
+hex = "0.4.0"
+quickcheck = "0.9.0"
+tokio-codec = "0.1.1"
 
 [[bench]]
 name = "benchmark"
