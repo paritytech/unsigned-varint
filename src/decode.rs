@@ -19,7 +19,7 @@
 
 use std::{self, fmt};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     /// Not enough input bytes.
     Insufficient,
