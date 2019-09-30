@@ -20,32 +20,20 @@
 use bytes::{Buf, BufMut, Bytes, BytesMut, IntoBuf};
 use crate::{encode, decode::{self, Error}};
 use std::{io, marker::PhantomData, usize};
-use tokio_codec::{Encoder, Decoder};
 
-
-/// tokio-codec based encoder + decoder of unsigned-varint values
+/// Encoder/Decoder of unsigned-varint values
 #[derive(Default)]
 pub struct Uvi<T>(PhantomData<T>);
 
-// Implement tokio-codec `Encoder` + `Decoder` traits for unsigned integers.
 macro_rules! encoder_decoder_impls {
     ($typ:ty, $enc:expr, $dec:expr, $arr:expr) => {
-        impl Encoder for Uvi<$typ> {
-            type Item = $typ;
-            type Error = io::Error;
-
-            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        impl Uvi<$typ> {
+            fn serialise(&mut self, item: $typ, dst: &mut BytesMut) {
                 let mut buf = $arr;
-                dst.extend_from_slice($enc(item, &mut buf));
-                Ok(())
+                dst.extend_from_slice($enc(item, &mut buf))
             }
-        }
 
-        impl Decoder for Uvi<$typ> {
-            type Item = $typ;
-            type Error = io::Error;
-
-            fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+            fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<$typ>, io::Error> {
                 let (number, consumed) =
                     match $dec(src.as_ref()) {
                         Ok((n, rem)) => (n, src.len() - rem.len()),
@@ -54,6 +42,48 @@ macro_rules! encoder_decoder_impls {
                     };
                 src.split_to(consumed);
                 Ok(Some(number))
+            }
+        }
+
+        #[cfg(feature = "codec")]
+        impl tokio_codec::Encoder for Uvi<$typ> {
+            type Item = $typ;
+            type Error = io::Error;
+
+            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+                self.serialise(item, dst);
+                Ok(())
+            }
+        }
+
+        #[cfg(feature = "codec")]
+        impl tokio_codec::Decoder for Uvi<$typ> {
+            type Item = $typ;
+            type Error = io::Error;
+
+            fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+                self.deserialise(src)
+            }
+        }
+
+        #[cfg(feature = "futures-codec")]
+        impl futures_codec::Encoder for Uvi<$typ> {
+            type Item = $typ;
+            type Error = io::Error;
+
+            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+                self.serialise(item, dst);
+                Ok(())
+            }
+        }
+
+        #[cfg(feature = "futures-codec")]
+        impl futures_codec::Decoder for Uvi<$typ> {
+            type Item = $typ;
+            type Error = io::Error;
+
+            fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+                self.deserialise(src)
             }
         }
     }
@@ -67,7 +97,7 @@ encoder_decoder_impls!(u128, encode::u128, decode::u128, encode::u128_buffer());
 encoder_decoder_impls!(usize, encode::usize, decode::usize, encode::usize_buffer());
 
 
-/// tokio-codec based encoder + decoder of unsigned-varint, length-prefixed bytes
+/// Encoder/Decoder of unsigned-varint, length-prefixed bytes
 pub struct UviBytes<T = Bytes> {
     /// the variable-length integer encoder/decoder
     varint_codec: Uvi<usize>,
@@ -99,33 +129,12 @@ impl<T> UviBytes<T> {
     pub fn max_len(&self) -> usize {
         self.max
     }
-}
 
-impl<T: IntoBuf> Encoder for UviBytes<T> {
-    type Item = T;
-    type Error = io::Error;
-
-    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
-        let bytes = item.into_buf();
-        if bytes.remaining() > self.max {
-            return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
-        }
-        self.varint_codec.encode(bytes.remaining(), dst)?;
-        dst.reserve(bytes.remaining());
-        dst.put(bytes);
-        Ok(())
-    }
-}
-
-impl<T> Decoder for UviBytes<T> {
-    type Item = BytesMut;
-    type Error = io::Error;
-
-    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+    fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<BytesMut>, io::Error> {
         loop {
             match self.len.take() {
                 None => {
-                    self.len = self.varint_codec.decode(src)?;
+                    self.len = self.varint_codec.deserialise(src)?;
                     if self.len.is_none() {
                         return Ok(None)
                     }
@@ -149,4 +158,57 @@ impl<T> Decoder for UviBytes<T> {
     }
 }
 
+impl<T: IntoBuf> UviBytes<T> {
+    fn serialise(&mut self, item: T, dst: &mut BytesMut) -> Result<(), io::Error> {
+        let bytes = item.into_buf();
+        if bytes.remaining() > self.max {
+            return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
+        }
+        self.varint_codec.serialise(bytes.remaining(), dst);
+        dst.reserve(bytes.remaining());
+        dst.put(bytes);
+        Ok(())
+    }
+}
+
+
+#[cfg(feature = "codec")]
+impl<T: IntoBuf> tokio_codec::Encoder for UviBytes<T> {
+    type Item = T;
+    type Error = io::Error;
+
+    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        self.serialise(item, dst)
+    }
+}
+
+#[cfg(feature = "codec")]
+impl<T> tokio_codec::Decoder for UviBytes<T> {
+    type Item = BytesMut;
+    type Error = io::Error;
+
+    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+        self.deserialise(src)
+    }
+}
+
+#[cfg(feature = "futures-codec")]
+impl<T: IntoBuf> futures_codec::Encoder for UviBytes<T> {
+    type Item = T;
+    type Error = io::Error;
+
+    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        self.serialise(item, dst)
+    }
+}
+
+#[cfg(feature = "futures-codec")]
+impl<T> futures_codec::Decoder for UviBytes<T> {
+    type Item = BytesMut;
+    type Error = io::Error;
+
+    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+        self.deserialise(src)
+    }
+}
 
