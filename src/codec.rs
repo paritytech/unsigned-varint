@@ -26,16 +26,16 @@ use std::{io, marker::PhantomData, usize};
 pub struct Uvi<T>(PhantomData<T>);
 
 macro_rules! encoder_decoder_impls {
-    ($typ:ty, $enc:expr, $dec:expr, $arr:expr) => {
+    ($typ:ident, $arr:ident) => {
         impl Uvi<$typ> {
             fn serialise(&mut self, item: $typ, dst: &mut BytesMut) {
-                let mut buf = $arr;
-                dst.extend_from_slice($enc(item, &mut buf))
+                let mut buf = encode::$arr();
+                dst.extend_from_slice(encode::$typ(item, &mut buf))
             }
 
             fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<$typ>, io::Error> {
                 let (number, consumed) =
-                    match $dec(src.as_ref()) {
+                    match decode::$typ(src.as_ref()) {
                         Ok((n, rem)) => (n, src.len() - rem.len()),
                         Err(Error::Insufficient) => return Ok(None),
                         Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e))
@@ -89,13 +89,12 @@ macro_rules! encoder_decoder_impls {
     }
 }
 
-encoder_decoder_impls!(u8, encode::u8, decode::u8, encode::u8_buffer());
-encoder_decoder_impls!(u16, encode::u16, decode::u16, encode::u16_buffer());
-encoder_decoder_impls!(u32, encode::u32, decode::u32, encode::u32_buffer());
-encoder_decoder_impls!(u64, encode::u64, decode::u64, encode::u64_buffer());
-encoder_decoder_impls!(u128, encode::u128, decode::u128, encode::u128_buffer());
-encoder_decoder_impls!(usize, encode::usize, decode::usize, encode::usize_buffer());
-
+encoder_decoder_impls!(u8, u8_buffer);
+encoder_decoder_impls!(u16, u16_buffer);
+encoder_decoder_impls!(u32, u32_buffer);
+encoder_decoder_impls!(u64, u64_buffer);
+encoder_decoder_impls!(u128, u128_buffer);
+encoder_decoder_impls!(usize, usize_buffer);
 
 /// Encoder/Decoder of unsigned-varint, length-prefixed bytes
 pub struct UviBytes<T = Bytes> {
