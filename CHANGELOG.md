@@ -1,3 +1,9 @@
+# 0.2.3 [2019-10-07]
+
+- In addition to `tokio-codec`, `futures_codec` is now supported (#18).
+- `decode::Error` now implements `Clone` (#19).
+- Code quality improvements (#20, #21).
+
 # 0.2.2 [2019-01-31]
 
 - Add package metadata for docs.rs to generate documentation for all features.
