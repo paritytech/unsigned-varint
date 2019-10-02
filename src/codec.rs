@@ -34,11 +34,12 @@ macro_rules! encoder_decoder_impls {
             }
 
             fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<$typ>, io::Error> {
-                let (number, consumed) = match decode::$typ(src.as_ref()) {
-                    Ok((n, rem)) => (n, src.len() - rem.len()),
-                    Err(Error::Insufficient) => return Ok(None),
-                    Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e)),
-                };
+                let (number, consumed) =
+                    match decode::$typ(src.as_ref()) {
+                        Ok((n, rem)) => (n, src.len() - rem.len()),
+                        Err(Error::Insufficient) => return Ok(None),
+                        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e))
+                    };
                 src.split_to(consumed);
                 Ok(Some(number))
             }
@@ -129,30 +130,21 @@ impl<T> UviBytes<T> {
     }
 
     fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<BytesMut>, io::Error> {
-        loop {
-            match self.len.take() {
-                None => {
-                    self.len = self.varint_codec.deserialise(src)?;
-                    if self.len.is_none() {
-                        return Ok(None)
-                    }
-                    continue
-                }
-                Some(n) if n > self.max => {
-                    return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max"))
-                }
-                Some(n) => {
-                    if src.len() < n {
-                        let add = n - src.len();
-                        src.reserve(add);
-                        self.len = Some(n);
-                        return Ok(None)
-                    } else {
-                        return Ok(Some(src.split_to(n)))
-                    }
-                }
-            }
+        if self.len.is_none() {
+            self.len = self.varint_codec.deserialise(src)?
         }
+        if let Some(n) = self.len.take() {
+            if n > self.max {
+                return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max"))
+            }
+            if n <= src.len() {
+                return Ok(Some(src.split_to(n)))
+            }
+            let add = n - src.len();
+            src.reserve(add);
+            self.len = Some(n)
+        }
+        Ok(None)
     }
 }
 
