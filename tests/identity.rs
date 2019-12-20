@@ -106,7 +106,7 @@ fn various() {
 fn identity_codec() {
     use bytes::{Bytes, BytesMut};
     use quickcheck::StdThreadGen;
-    use tokio_codec::{Encoder, Decoder};
+    use tokio_util::codec::{Encoder, Decoder};
     use unsigned_varint::codec::UviBytes;
 
     fn prop(mut xs: Vec<u8>) -> bool {
