@@ -16,7 +16,7 @@ codec = ["bytes", "tokio-util"]
 futures-codec = ["bytes", "futures_codec"]
 
 [dependencies]
-bytes = { package = "bytes", version = "0.5.3", optional = true }
+bytes = { version = "0.5.3", optional = true }
 futures_codec = { version = "0.3.4", optional = true }
 tokio-util = { version = "0.2", features = ["codec"], optional = true }
 
