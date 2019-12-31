@@ -17,7 +17,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-use bytes::{Buf, BufMut, Bytes, BytesMut, IntoBuf};
+use bytes::{Buf, BufMut, Bytes, BytesMut};
 use crate::{encode, decode::{self, Error}};
 use std::{io, marker::PhantomData, usize};
 
@@ -40,13 +40,13 @@ macro_rules! encoder_decoder_impls {
                         Err(Error::Insufficient) => return Ok(None),
                         Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e))
                     };
-                src.split_to(consumed);
+                src.advance(consumed);
                 Ok(Some(number))
             }
         }
 
         #[cfg(feature = "codec")]
-        impl tokio_codec::Encoder for Uvi<$typ> {
+        impl tokio_util::codec::Encoder for Uvi<$typ> {
             type Item = $typ;
             type Error = io::Error;
 
@@ -57,7 +57,7 @@ macro_rules! encoder_decoder_impls {
         }
 
         #[cfg(feature = "codec")]
-        impl tokio_codec::Decoder for Uvi<$typ> {
+        impl tokio_util::codec::Decoder for Uvi<$typ> {
             type Item = $typ;
             type Error = io::Error;
 
@@ -148,22 +148,21 @@ impl<T> UviBytes<T> {
     }
 }
 
-impl<T: IntoBuf> UviBytes<T> {
+impl<T: Buf> UviBytes<T> {
     fn serialise(&mut self, item: T, dst: &mut BytesMut) -> Result<(), io::Error> {
-        let bytes = item.into_buf();
-        if bytes.remaining() > self.max {
+        if item.remaining() > self.max {
             return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
         }
-        self.varint_codec.serialise(bytes.remaining(), dst);
-        dst.reserve(bytes.remaining());
-        dst.put(bytes);
+        self.varint_codec.serialise(item.remaining(), dst);
+        dst.reserve(item.remaining());
+        dst.put(item);
         Ok(())
     }
 }
 
 
 #[cfg(feature = "codec")]
-impl<T: IntoBuf> tokio_codec::Encoder for UviBytes<T> {
+impl<T: Buf> tokio_util::codec::Encoder for UviBytes<T> {
     type Item = T;
     type Error = io::Error;
 
@@ -173,7 +172,7 @@ impl<T: IntoBuf> tokio_codec::Encoder for UviBytes<T> {
 }
 
 #[cfg(feature = "codec")]
-impl<T> tokio_codec::Decoder for UviBytes<T> {
+impl<T> tokio_util::codec::Decoder for UviBytes<T> {
     type Item = BytesMut;
     type Error = io::Error;
 
@@ -183,7 +182,7 @@ impl<T> tokio_codec::Decoder for UviBytes<T> {
 }
 
 #[cfg(feature = "futures-codec")]
-impl<T: IntoBuf> futures_codec::Encoder for UviBytes<T> {
+impl<T: Buf> futures_codec::Encoder for UviBytes<T> {
     type Item = T;
     type Error = io::Error;
 

@@ -1,3 +1,10 @@
+# 0.3.0
+
+- Update to `bytes` v0.5.
+- Add support for `tokio-util` v0.2.
+- Remove support for `tokio-codec` v0.1.
+- Use `#[non_exhaustive]` in `decode::Error` and remove `__Nonexhaustive`.
+
 # 0.2.3 [2019-10-07]
 
 - In addition to `tokio-codec`, `futures_codec` is now supported (#18).

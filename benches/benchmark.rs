@@ -40,7 +40,7 @@ fn bench_encode(c: &mut Criterion) {
 #[cfg(feature = "codec")]
 fn bench_codec(c: &mut Criterion) {
     use bytes::{Bytes, BytesMut};
-    use tokio_codec::{Decoder, Encoder};
+    use tokio_util::codec::{Decoder, Encoder};
     use unsigned_varint::codec::UviBytes;
 
     let data = Bytes::from(vec![1; 8192]);
@@ -49,7 +49,7 @@ fn bench_codec(c: &mut Criterion) {
 
     c.bench_function("codec", move |b| b.iter(|| {
         uvi_bytes.encode(data.clone(), &mut bytes).unwrap();
-        assert_eq!(data, uvi_bytes.decode(&mut bytes.take()).unwrap().unwrap())
+        assert_eq!(data, uvi_bytes.decode(&mut bytes.split_to(bytes.len())).unwrap().unwrap())
     }));
 }
 
