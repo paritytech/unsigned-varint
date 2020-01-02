@@ -1,4 +1,4 @@
-# 0.3.0
+# 0.3.0 [2020-01-02]
 
 - Update to `bytes` v0.5.
 - Add support for `tokio-util` v0.2.
