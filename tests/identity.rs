@@ -121,3 +121,4 @@ fn identity_codec() {
     QuickCheck::with_gen(StdThreadGen::new(512 * 1024))
         .quickcheck(prop as fn(Vec<u8>) -> bool)
 }
+

@@ -17,24 +17,27 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-//! Decode using [`std::io::Read`] types.
+//! Decode using [`futures::io::AsyncRead`] types.
 
-use crate::{decode, encode};
-use std::{fmt, io};
+use crate::{decode, encode, io::ReadError};
+use futures::io::{AsyncRead, AsyncReadExt};
+use std::io;
 
 macro_rules! gen {
     ($($name:ident, $d:expr, $t:ident, $b:ident);*) => {
         $(
             #[doc = " Try to read and decode a "]
             #[doc = $d]
-            #[doc = " from the given `Read` type."]
-            pub fn $name<R: io::Read>(reader: R) -> Result<$t, ReadError> {
-                let mut buf = encode::$b();
-                for (i, b) in reader.bytes().take(buf.len()).enumerate() {
-                    let b = b?;
-                    buf[i] = b;
-                    if decode::is_last(b) {
-                        return Ok(decode::$t(&buf[..= i])?.0)
+            #[doc = " from the given `AscynRead` type."]
+            pub async fn $name<R: AsyncRead + Unpin>(mut reader: R) -> Result<$t, ReadError> {
+                let mut b = encode::$b();
+                for i in 0 .. b.len() {
+                    let n = reader.read(&mut b[i .. i + 1]).await?;
+                    if n == 0 {
+                        return Err(ReadError::Io(io::ErrorKind::UnexpectedEof.into()))
+                    }
+                    if decode::is_last(b[i]) {
+                        return Ok(decode::$t(&b[..= i])?.0)
                     }
                 }
                 Err(decode::Error::Overflow)?
@@ -51,41 +54,3 @@ gen! {
     read_usize, "`usize`", usize, usize_buffer
 }
 
-/// Possible read errors.
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum ReadError {
-    Io(io::Error),
-    Decode(decode::Error)
-}
-
-impl fmt::Display for ReadError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ReadError::Io(e) => write!(f, "i/o error: {}", e),
-            ReadError::Decode(e) => write!(f, "decode error: {}", e)
-        }
-    }
-}
-
-impl std::error::Error for ReadError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        if let ReadError::Io(e) = self {
-            Some(e)
-        } else {
-            None
-        }
-    }
-}
-
-impl From<io::Error> for ReadError {
-    fn from(e: io::Error) -> Self {
-        ReadError::Io(e)
-    }
-}
-
-impl From<decode::Error> for ReadError {
-    fn from(e: decode::Error) -> Self {
-        ReadError::Decode(e)
-    }
-}
