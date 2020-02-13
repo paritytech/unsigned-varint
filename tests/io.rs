@@ -25,10 +25,11 @@ fn read_arbitrary() {
     fn property(n: RandomUvi) {
         let mut r = std::io::Cursor::new(n.bytes());
         match n {
-            RandomUvi::U8(n,  _) => assert_eq!(n, io::read_u8(&mut r).unwrap()),
-            RandomUvi::U16(n, _) => assert_eq!(n, io::read_u16(&mut r).unwrap()),
-            RandomUvi::U32(n, _) => assert_eq!(n, io::read_u32(&mut r).unwrap()),
-            RandomUvi::U64(n, _) => assert_eq!(n, io::read_u64(&mut r).unwrap())
+            RandomUvi::U8(n,  _)   => assert_eq!(n, io::read_u8(&mut r).unwrap()),
+            RandomUvi::U16(n, _)   => assert_eq!(n, io::read_u16(&mut r).unwrap()),
+            RandomUvi::U32(n, _)   => assert_eq!(n, io::read_u32(&mut r).unwrap()),
+            RandomUvi::U64(n, _)   => assert_eq!(n, io::read_u64(&mut r).unwrap()),
+            RandomUvi::Usize(n, _) => assert_eq!(n, io::read_usize(&mut r).unwrap())
         }
     }
     quickcheck::quickcheck(property as fn(RandomUvi))
@@ -43,10 +44,11 @@ fn async_read_arbitrary() {
         futures::executor::block_on(async move {
             let mut r = futures::io::Cursor::new(n.bytes());
             match n {
-                RandomUvi::U8(n,  _) => assert_eq!(n, aio::read_u8(&mut r).await.unwrap()),
-                RandomUvi::U16(n, _) => assert_eq!(n, aio::read_u16(&mut r).await.unwrap()),
-                RandomUvi::U32(n, _) => assert_eq!(n, aio::read_u32(&mut r).await.unwrap()),
-                RandomUvi::U64(n, _) => assert_eq!(n, aio::read_u64(&mut r).await.unwrap())
+                RandomUvi::U8(n,  _)   => assert_eq!(n, aio::read_u8(&mut r).await.unwrap()),
+                RandomUvi::U16(n, _)   => assert_eq!(n, aio::read_u16(&mut r).await.unwrap()),
+                RandomUvi::U32(n, _)   => assert_eq!(n, aio::read_u32(&mut r).await.unwrap()),
+                RandomUvi::U64(n, _)   => assert_eq!(n, aio::read_u64(&mut r).await.unwrap()),
+                RandomUvi::Usize(n, _) => assert_eq!(n, aio::read_usize(&mut r).await.unwrap())
             }
         })
     }
@@ -58,7 +60,8 @@ enum RandomUvi {
     U8(u8, Vec<u8>),
     U16(u16, Vec<u8>),
     U32(u32, Vec<u8>),
-    U64(u64, Vec<u8>)
+    U64(u64, Vec<u8>),
+    Usize(usize, Vec<u8>),
 }
 
 impl RandomUvi {
@@ -67,7 +70,8 @@ impl RandomUvi {
             RandomUvi::U8(_,  v) => v,
             RandomUvi::U16(_, v) => v,
             RandomUvi::U32(_, v) => v,
-            RandomUvi::U64(_, v) => v
+            RandomUvi::U64(_, v) => v,
+            RandomUvi::Usize(_, v) => v
         }
     }
 }
@@ -75,7 +79,7 @@ impl RandomUvi {
 impl Arbitrary for RandomUvi {
     fn arbitrary<G: Gen>(g: &mut G) -> Self {
         let n = g.next_u64();
-        match n % 4 {
+        match n % 5 {
             0 => {
                 let mut b = encode::u8_buffer();
                 RandomUvi::U8(n as u8, Vec::from(encode::u8(n as u8, &mut b)))
@@ -88,9 +92,13 @@ impl Arbitrary for RandomUvi {
                 let mut b = encode::u32_buffer();
                 RandomUvi::U32(n as u32, Vec::from(encode::u32(n as u32, &mut b)))
             }
-            _ => {
+            3 => {
                 let mut b = encode::u64_buffer();
                 RandomUvi::U64(n, Vec::from(encode::u64(n, &mut b)))
+            }
+            _ => {
+                let mut b = encode::usize_buffer();
+                RandomUvi::Usize(n as usize, Vec::from(encode::usize(n as usize, &mut b)))
             }
         }
     }
