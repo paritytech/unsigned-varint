@@ -23,5 +23,7 @@
 
 pub mod decode;
 pub mod encode;
+pub mod io;
+
 #[cfg(any(feature = "codec", feature = "futures-codec"))]
 pub mod codec;
