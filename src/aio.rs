@@ -28,7 +28,7 @@ macro_rules! gen {
         $(
             #[doc = " Try to read and decode a "]
             #[doc = $d]
-            #[doc = " from the given `AscynRead` type."]
+            #[doc = " from the given `AsyncRead` type."]
             pub async fn $name<R: AsyncRead + Unpin>(mut reader: R) -> Result<$t, ReadError> {
                 let mut b = encode::$b();
                 for i in 0 .. b.len() {
