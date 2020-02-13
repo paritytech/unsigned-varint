@@ -48,6 +48,7 @@ gen! {
     read_u16,   "`u16`",   u16,   u16_buffer;
     read_u32,   "`u32`",   u32,   u32_buffer;
     read_u64,   "`u64`",   u64,   u64_buffer;
+    read_u128,  "`u128`",  u128,  u128_buffer;
     read_usize, "`usize`", usize, usize_buffer
 }
 

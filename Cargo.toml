@@ -24,6 +24,7 @@ tokio-util = { version = "0.2", features = ["codec"], optional = true }
 [dev-dependencies]
 criterion = "0.3"
 hex = "0.4"
+rand = "0.7"
 quickcheck = "0.9"
 tokio-util = { version = "0.2", features = ["codec"] }
 

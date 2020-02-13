@@ -18,6 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use quickcheck::{Arbitrary, Gen};
+use rand::Rng;
 use unsigned_varint::{encode, io};
 
 #[test]
@@ -29,6 +30,7 @@ fn read_arbitrary() {
             RandomUvi::U16(n, _)   => assert_eq!(n, io::read_u16(&mut r).unwrap()),
             RandomUvi::U32(n, _)   => assert_eq!(n, io::read_u32(&mut r).unwrap()),
             RandomUvi::U64(n, _)   => assert_eq!(n, io::read_u64(&mut r).unwrap()),
+            RandomUvi::U128(n, _)  => assert_eq!(n, io::read_u128(&mut r).unwrap()),
             RandomUvi::Usize(n, _) => assert_eq!(n, io::read_usize(&mut r).unwrap())
         }
     }
@@ -48,6 +50,7 @@ fn async_read_arbitrary() {
                 RandomUvi::U16(n, _)   => assert_eq!(n, aio::read_u16(&mut r).await.unwrap()),
                 RandomUvi::U32(n, _)   => assert_eq!(n, aio::read_u32(&mut r).await.unwrap()),
                 RandomUvi::U64(n, _)   => assert_eq!(n, aio::read_u64(&mut r).await.unwrap()),
+                RandomUvi::U128(n, _)  => assert_eq!(n, aio::read_u128(&mut r).await.unwrap()),
                 RandomUvi::Usize(n, _) => assert_eq!(n, aio::read_usize(&mut r).await.unwrap())
             }
         })
@@ -61,6 +64,7 @@ enum RandomUvi {
     U16(u16, Vec<u8>),
     U32(u32, Vec<u8>),
     U64(u64, Vec<u8>),
+    U128(u128, Vec<u8>),
     Usize(usize, Vec<u8>),
 }
 
@@ -71,6 +75,7 @@ impl RandomUvi {
             RandomUvi::U16(_, v) => v,
             RandomUvi::U32(_, v) => v,
             RandomUvi::U64(_, v) => v,
+            RandomUvi::U128(_, v) => v,
             RandomUvi::Usize(_, v) => v
         }
     }
@@ -78,8 +83,8 @@ impl RandomUvi {
 
 impl Arbitrary for RandomUvi {
     fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        let n = g.next_u64();
-        match n % 5 {
+        let n: u128 = g.gen();
+        match n % 6 {
             0 => {
                 let mut b = encode::u8_buffer();
                 RandomUvi::U8(n as u8, Vec::from(encode::u8(n as u8, &mut b)))
@@ -94,7 +99,11 @@ impl Arbitrary for RandomUvi {
             }
             3 => {
                 let mut b = encode::u64_buffer();
-                RandomUvi::U64(n, Vec::from(encode::u64(n, &mut b)))
+                RandomUvi::U64(n as u64, Vec::from(encode::u64(n as u64, &mut b)))
+            }
+            4 => {
+                let mut b = encode::u128_buffer();
+                RandomUvi::U128(n, Vec::from(encode::u128(n, &mut b)))
             }
             _ => {
                 let mut b = encode::usize_buffer();
