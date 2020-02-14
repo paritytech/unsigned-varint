@@ -28,13 +28,15 @@ macro_rules! gen {
             #[doc = " Try to read and decode a "]
             #[doc = $d]
             #[doc = " from the given `Read` type."]
-            pub fn $name<R: io::Read>(reader: R) -> Result<$t, ReadError> {
-                let mut buf = encode::$b();
-                for (i, b) in reader.bytes().take(buf.len()).enumerate() {
-                    let b = b?;
-                    buf[i] = b;
-                    if decode::is_last(b) {
-                        return Ok(decode::$t(&buf[..= i])?.0)
+            pub fn $name<R: io::Read>(mut reader: R) -> Result<$t, ReadError> {
+                let mut b = encode::$b();
+                for i in 0 .. b.len() {
+                    let n = reader.read(&mut b[i .. i + 1])?;
+                    if n == 0 {
+                        return Err(ReadError::Io(io::ErrorKind::UnexpectedEof.into()))
+                    }
+                    if decode::is_last(b[i]) {
+                        return Ok(decode::$t(&b[..= i])?.0)
                     }
                 }
                 Err(decode::Error::Overflow)?
