@@ -17,6 +17,8 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//! Basic unsigned-varint decoding.
+
 use std::{self, fmt};
 
 /// Possible decoding errors.
@@ -46,7 +48,7 @@ macro_rules! decode {
         for (i, b) in $buf.iter().cloned().enumerate() {
             let k = $typ::from(b & 0x7F);
             n |= k << (i * 7);
-            if b & 0x80 == 0 {
+            if is_last(b) {
                 return Ok((n, &$buf[i+1..]))
             }
             if i == $max_bytes {
@@ -55,6 +57,12 @@ macro_rules! decode {
         }
         Err(Error::Insufficient)
     }}
+}
+
+/// Is this the last byte of an unsigned varint?
+#[inline]
+pub fn is_last(b: u8) -> bool {
+    b & 0x80 == 0
 }
 
 /// Decode the given slice as `u8`.
