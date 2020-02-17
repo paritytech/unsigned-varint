@@ -1,3 +1,8 @@
+# 0.3.1 [2020-02-17]
+
+- Add modules `io` and `aio` to support direct reading of an unsigned-varint
+  value from a `std::io::Read` or `futures::io::AsyncRead` type.
+
 # 0.3.0 [2020-01-02]
 
 - Update to `bytes` v0.5.
