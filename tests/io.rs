@@ -43,8 +43,8 @@ fn async_read_arbitrary() {
     use unsigned_varint::aio;
 
     fn property(n: RandomUvi) {
-        futures::executor::block_on(async move {
-            let mut r = futures::io::Cursor::new(n.bytes());
+        futures_executor::block_on(async move {
+            let mut r = futures_util::io::Cursor::new(n.bytes());
             match n {
                 RandomUvi::U8(n,  _)   => assert_eq!(n, aio::read_u8(&mut r).await.unwrap()),
                 RandomUvi::U16(n, _)   => assert_eq!(n, aio::read_u16(&mut r).await.unwrap()),
