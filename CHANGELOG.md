@@ -1,3 +1,8 @@
+# 0.3.2 [2020-03-04]
+
+- Replace the optional `futures` dependency with a `futures` feature that
+only includes `futures-io` and `futures-util` as dependencies (#26).
+
 # 0.3.1 [2020-02-17]
 
 - Add modules `io` and `aio` to support direct reading of an unsigned-varint
