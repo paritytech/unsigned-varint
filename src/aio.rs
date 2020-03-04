@@ -17,10 +17,11 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-//! Decode using [`futures::io::AsyncRead`] types.
+//! Decode using [`futures_io::AsyncRead`] types.
 
 use crate::{decode, encode, io::ReadError};
-use futures::io::{AsyncRead, AsyncReadExt};
+use futures_io::AsyncRead;
+use futures_util::io::AsyncReadExt;
 use std::io;
 
 macro_rules! gen {

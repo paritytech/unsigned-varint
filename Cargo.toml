@@ -13,16 +13,19 @@ all-features = true
 
 [features]
 codec = ["bytes", "tokio-util"]
+futures = ["futures-io", "futures-util"]
 futures-codec = ["bytes", "futures_codec"]
 
 [dependencies]
 bytes = { version = "0.5.3", optional = true }
-futures = { version = "0.3.4", optional = true }
+futures-io = { version = "0.3.4", optional = true }
+futures-util = { version = "0.3.4", features = ["io"], optional = true }
 futures_codec = { version = "0.3.4", optional = true }
 tokio-util = { version = "0.2", features = ["codec"], optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
+futures-executor = "0.3.4"
 hex = "0.4"
 rand = "0.7"
 quickcheck = "0.9"
