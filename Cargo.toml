@@ -22,6 +22,7 @@ futures-io = { version = "0.3.4", optional = true }
 futures-util = { version = "0.3.4", features = ["io"], optional = true }
 futures_codec = { version = "0.3.4", optional = true }
 tokio-util = { version = "0.2", features = ["codec"], optional = true }
+nom = { version = "5", optional = true }
 
 [dev-dependencies]
 criterion = "0.3"

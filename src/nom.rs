@@ -1,4 +1,4 @@
-// Copyright 2018-2019 Parity Technologies (UK) Ltd.
+// Copyright (c) 2020 Aleksa Sarai <cyphar@cyphar.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -17,19 +17,33 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-//! Unsigned varint encodes unsigned integers in 7-bit groups. The most
-//! significant bit (MSB) in each byte indicates if another byte follows
-//! (MSB = 1), or not (MSB = 0).
+//! `nom` combinators to decode unsigned varints.
 
-pub mod decode;
-pub mod encode;
-pub mod io;
+use crate::decode::{self, Error};
+use nom::{error::ErrorKind, Err as NomErr, IResult, Needed};
 
-#[cfg(feature = "futures")]
-pub mod aio;
+macro_rules! gen {
+    ($($type:ident, $d:expr, $b:ident);*) => {
+        $(
+            #[doc = " `nom` combinator to decode a variable-length encoded "]
+            #[doc = $d]
+            #[doc = "."]
+            pub fn $type(input: &[u8]) -> IResult<&[u8], $type> {
+                let (n, remain) = decode::$type(input).map_err(|err| match err {
+                    Error::Insufficient => NomErr::Incomplete(Needed::Unknown),
+                    Error::Overflow => NomErr::Error((input, ErrorKind::TooLarge)),
+                })?;
+                Ok((remain, n))
+            }
+        )*
+    }
+}
 
-#[cfg(any(feature = "codec", feature = "futures-codec"))]
-pub mod codec;
-
-#[cfg(feature = "nom")]
-pub mod nom;
+gen! {
+    u8,    "`u8`",    u8_buffer;
+    u16,   "`u16`",   u16_buffer;
+    u32,   "`u32`",   u32_buffer;
+    u64,   "`u64`",   u64_buffer;
+    u128,  "`u128`",  u128_buffer;
+    usize, "`usize`", usize_buffer
+}

@@ -58,6 +58,27 @@ fn async_read_arbitrary() {
     quickcheck::quickcheck(property as fn(RandomUvi))
 }
 
+#[cfg(feature = "nom")]
+#[test]
+fn nom_read_arbitrary() {
+    use unsigned_varint::nom;
+
+    fn property(n: RandomUvi) {
+        let input = n.bytes();
+        let empty = &[][..];
+
+        match n {
+            RandomUvi::U8(n, _)    => assert_eq!((empty, n), nom::u8(input).unwrap()),
+            RandomUvi::U16(n, _)   => assert_eq!((empty, n), nom::u16(input).unwrap()),
+            RandomUvi::U32(n, _)   => assert_eq!((empty, n), nom::u32(input).unwrap()),
+            RandomUvi::U64(n, _)   => assert_eq!((empty, n), nom::u64(input).unwrap()),
+            RandomUvi::U128(n, _)  => assert_eq!((empty, n), nom::u128(input).unwrap()),
+            RandomUvi::Usize(n, _) => assert_eq!((empty, n), nom::usize(input).unwrap()),
+        }
+    }
+    quickcheck::quickcheck(property as fn(RandomUvi))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum RandomUvi {
     U8(u8, Vec<u8>),
