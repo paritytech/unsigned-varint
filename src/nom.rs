@@ -23,7 +23,7 @@ use crate::decode::{self, Error};
 use nom::{error::ErrorKind, Err as NomErr, IResult, Needed};
 
 macro_rules! gen {
-    ($($type:ident, $d:expr, $b:ident);*) => {
+    ($($type:ident, $d:expr);*) => {
         $(
             #[doc = " `nom` combinator to decode a variable-length encoded "]
             #[doc = $d]
@@ -40,10 +40,10 @@ macro_rules! gen {
 }
 
 gen! {
-    u8,    "`u8`",    u8_buffer;
-    u16,   "`u16`",   u16_buffer;
-    u32,   "`u32`",   u32_buffer;
-    u64,   "`u64`",   u64_buffer;
-    u128,  "`u128`",  u128_buffer;
-    usize, "`usize`", usize_buffer
+    u8,    "`u8`";
+    u16,   "`u16`";
+    u32,   "`u32`";
+    u64,   "`u64`";
+    u128,  "`u128`";
+    usize, "`usize`"
 }
