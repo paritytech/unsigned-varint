@@ -1,3 +1,7 @@
+# 0.3.3 [2020-04-14]
+
+- Optional support for nom has been added (#27).
+
 # 0.3.2 [2020-03-04]
 
 - Replace the optional `futures` dependency with a `futures` feature that
