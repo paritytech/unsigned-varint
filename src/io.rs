@@ -39,7 +39,7 @@ macro_rules! gen {
                         return Ok(decode::$t(&b[..= i])?.0)
                     }
                 }
-                Err(decode::Error::Overflow)?
+                Err(decode::Error::Overflow.into())
             }
         )*
     }
