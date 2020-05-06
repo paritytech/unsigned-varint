@@ -19,8 +19,11 @@
 
 //! `Encoder`/`Decoder` implementations for tokio or futures_codec.
 
+use crate::{
+    decode::{self, Error},
+    encode,
+};
 use bytes::{Buf, BufMut, Bytes, BytesMut};
-use crate::{encode, decode::{self, Error}};
 use std::{io, marker::PhantomData, usize};
 
 /// Encoder/Decoder of unsigned-varint values
@@ -36,23 +39,21 @@ macro_rules! encoder_decoder_impls {
             }
 
             fn deserialise(&mut self, src: &mut BytesMut) -> Result<Option<$typ>, io::Error> {
-                let (number, consumed) =
-                    match decode::$typ(src.as_ref()) {
-                        Ok((n, rem)) => (n, src.len() - rem.len()),
-                        Err(Error::Insufficient) => return Ok(None),
-                        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e))
-                    };
+                let (number, consumed) = match decode::$typ(src.as_ref()) {
+                    Ok((n, rem)) => (n, src.len() - rem.len()),
+                    Err(Error::Insufficient) => return Ok(None),
+                    Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e)),
+                };
                 src.advance(consumed);
                 Ok(Some(number))
             }
         }
 
         #[cfg(feature = "codec")]
-        impl tokio_util::codec::Encoder for Uvi<$typ> {
-            type Item = $typ;
+        impl tokio_util::codec::Encoder<$typ> for Uvi<$typ> {
             type Error = io::Error;
 
-            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+            fn encode(&mut self, item: $typ, dst: &mut BytesMut) -> Result<(), Self::Error> {
                 self.serialise(item, dst);
                 Ok(())
             }
@@ -88,7 +89,7 @@ macro_rules! encoder_decoder_impls {
                 self.deserialise(src)
             }
         }
-    }
+    };
 }
 
 encoder_decoder_impls!(u8, u8_buffer);
@@ -106,7 +107,7 @@ pub struct UviBytes<T = Bytes> {
     len: Option<usize>,
     // maximum permitted number of bytes per frame
     max: usize,
-    _ty: PhantomData<T>
+    _ty: PhantomData<T>,
 }
 
 impl<T> Default for UviBytes<T> {
@@ -115,7 +116,7 @@ impl<T> Default for UviBytes<T> {
             varint_codec: Default::default(),
             len: None,
             max: 128 * 1024 * 1024,
-            _ty: PhantomData
+            _ty: PhantomData,
         }
     }
 }
@@ -137,10 +138,10 @@ impl<T> UviBytes<T> {
         }
         if let Some(n) = self.len.take() {
             if n > self.max {
-                return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max"))
+                return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max"));
             }
             if n <= src.len() {
-                return Ok(Some(src.split_to(n)))
+                return Ok(Some(src.split_to(n)));
             }
             let add = n - src.len();
             src.reserve(add);
@@ -153,7 +154,10 @@ impl<T> UviBytes<T> {
 impl<T: Buf> UviBytes<T> {
     fn serialise(&mut self, item: T, dst: &mut BytesMut) -> Result<(), io::Error> {
         if item.remaining() > self.max {
-            return Err(io::Error::new(io::ErrorKind::PermissionDenied, "len > max when encoding"));
+            return Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "len > max when encoding",
+            ));
         }
         self.varint_codec.serialise(item.remaining(), dst);
         dst.reserve(item.remaining());
@@ -162,13 +166,11 @@ impl<T: Buf> UviBytes<T> {
     }
 }
 
-
 #[cfg(feature = "codec")]
-impl<T: Buf> tokio_util::codec::Encoder for UviBytes<T> {
-    type Item = T;
+impl<T: Buf> tokio_util::codec::Encoder<T> for UviBytes<T> {
     type Error = io::Error;
 
-    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+    fn encode(&mut self, item: T, dst: &mut BytesMut) -> Result<(), Self::Error> {
         self.serialise(item, dst)
     }
 }
@@ -202,4 +204,3 @@ impl<T> futures_codec::Decoder for UviBytes<T> {
         self.deserialise(src)
     }
 }
-
