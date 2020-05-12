@@ -20,63 +20,40 @@
 //! Basic unsigned-varint encoding.
 
 macro_rules! encode {
-    ($number:expr, $buf:expr) => {{
-        let mut n = $number;
-        let mut i = 0;
-        for b in $buf.iter_mut() {
-            *b = n as u8 | 0x80;
-            n >>= 7;
-            if n == 0 {
-                *b &= 0x7f;
-                break
+    ($($type:ident, $name:expr, $buf_len:ident);*) => {
+        $(
+            #[doc = "Encode the given "]
+            #[doc = $name]
+            #[doc = " into the given byte array.\n\n"]
+            #[doc = "Returns the slice of encoded bytes."]
+            #[inline]
+            pub fn $type(number: $type, buf: &mut [u8; $buf_len]) -> &[u8] {
+                let mut n = number;
+                let mut i = 0;
+                for b in buf.iter_mut() {
+                    *b = n as u8 | 0x80;
+                    n >>= 7;
+                    if n == 0 {
+                        *b &= 0x7f;
+                        break
+                    }
+                    i += 1
+                }
+                debug_assert_eq!(n, 0);
+                &buf[0..=i]
             }
-            i += 1
-        }
-        debug_assert_eq!(n, 0);
-        &$buf[0..=i]
-    }}
+        )*
+    }
 }
 
-
-/// Encode the given `u8` into the given byte array.
-///
-/// Returns the slice of encoded bytes.
-#[inline]
-pub fn u8(number: u8, buf: &mut [u8; U8_LEN]) -> &[u8] {
-    encode!(number, buf)
+encode! {
+    u8,   "`u8`",   U8_LEN;
+    u16,  "`u16`",  U16_LEN;
+    u32,  "`u32`",  U32_LEN;
+    u64,  "`u64`",  U64_LEN;
+    u128, "`u128`", U128_LEN
 }
 
-/// Encode the given `u16` into the given byte array.
-///
-/// Returns the slice of encoded bytes.
-#[inline]
-pub fn u16(number: u16, buf: &mut [u8; U16_LEN]) -> &[u8] {
-    encode!(number, buf)
-}
-
-/// Encode the given `u32` into the given byte array.
-///
-/// Returns the slice of encoded bytes.
-#[inline]
-pub fn u32(number: u32, buf: &mut [u8; U32_LEN]) -> &[u8] {
-    encode!(number, buf)
-}
-
-/// Encode the given `u64` into the given byte array.
-///
-/// Returns the slice of encoded bytes.
-#[inline]
-pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
-    encode!(number, buf)
-}
-
-/// Encode the given `u128` into the given byte array.
-///
-/// Returns the slice of encoded bytes.
-#[inline]
-pub fn u128(number: u128, buf: &mut [u8; U128_LEN]) -> &[u8] {
-    encode!(number, buf)
-}
 
 /// Encode the given `usize` into the given byte array.
 ///
@@ -96,42 +73,28 @@ pub fn usize(number: usize, buf: &mut [u8; USIZE_LEN]) -> &[u8] {
     u32(number as u32, buf)
 }
 
-/// Create new array buffer for encoding of `u8` values.
-#[inline]
-pub fn u8_buffer() -> [u8; U8_LEN] {
-    [0; U8_LEN]
+macro_rules! buffer {
+    ($($func_name:ident, $type:expr, $buf_len:ident);*) => {
+        $(
+            #[doc = "Create new array buffer for encoding of "]
+            #[doc = $type]
+            #[doc = " values."]
+            #[inline]
+            pub fn $func_name() -> [u8; $buf_len] {
+                [0; $buf_len]
+            }
+        )*
+    }
 }
 
-/// Create new array buffer for encoding of `u16` values.
-#[inline]
-pub fn u16_buffer() -> [u8; U16_LEN] {
-    [0; U16_LEN]
+buffer! {
+    u8_buffer,    "`u8`",    U8_LEN;
+    u16_buffer,   "`u16`",   U16_LEN;
+    u32_buffer,   "`u32`",   U32_LEN;
+    u64_buffer,   "`u64`",   U64_LEN;
+    u128_buffer,  "`u128`",  U128_LEN;
+    usize_buffer, "`usize`", USIZE_LEN
 }
-
-/// Create new array buffer for encoding of `u32` values.
-#[inline]
-pub fn u32_buffer() -> [u8; U32_LEN] {
-    [0; U32_LEN]
-}
-
-/// Create new array buffer for encoding of `u64` values.
-#[inline]
-pub fn u64_buffer() -> [u8; U64_LEN] {
-    [0; U64_LEN]
-}
-
-/// Create new array buffer for encoding of `u128` values.
-#[inline]
-pub fn u128_buffer() -> [u8; U128_LEN] {
-    [0; U128_LEN]
-}
-
-/// Create new array buffer for encoding of `usize` values.
-#[inline]
-pub fn usize_buffer() -> [u8; USIZE_LEN] {
-    [0; USIZE_LEN]
-}
-
 
 // Required lengths of encoding buffers:
 
