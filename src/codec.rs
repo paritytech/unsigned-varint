@@ -48,11 +48,10 @@ macro_rules! encoder_decoder_impls {
         }
 
         #[cfg(feature = "codec")]
-        impl tokio_util::codec::Encoder for Uvi<$typ> {
-            type Item = $typ;
+        impl tokio_util::codec::Encoder<$typ> for Uvi<$typ> {
             type Error = io::Error;
 
-            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+            fn encode(&mut self, item: $typ, dst: &mut BytesMut) -> Result<(), Self::Error> {
                 self.serialise(item, dst);
                 Ok(())
             }
@@ -164,11 +163,10 @@ impl<T: Buf> UviBytes<T> {
 
 
 #[cfg(feature = "codec")]
-impl<T: Buf> tokio_util::codec::Encoder for UviBytes<T> {
-    type Item = T;
+impl<T: Buf> tokio_util::codec::Encoder<T> for UviBytes<T> {
     type Error = io::Error;
 
-    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+    fn encode(&mut self, item: T, dst: &mut BytesMut) -> Result<(), Self::Error> {
         self.serialise(item, dst)
     }
 }
