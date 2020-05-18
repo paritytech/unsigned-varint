@@ -1,3 +1,7 @@
+# 0.4.0 [2020-05-18]
+
+- Update `tokio-util` and `futures_codec` (#31).
+
 # 0.3.3 [2020-04-14]
 
 - Optional support for nom has been added (#27).
