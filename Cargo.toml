@@ -20,8 +20,8 @@ futures-codec = ["bytes", "futures_codec"]
 bytes = { version = "0.5.3", optional = true }
 futures-io = { version = "0.3.4", optional = true }
 futures-util = { version = "0.3.4", features = ["io"], optional = true }
-futures_codec = { version = "0.3.4", optional = true }
-tokio-util = { version = "0.2", features = ["codec"], optional = true }
+futures_codec = { version = "0.4", optional = true }
+tokio-util = { version = "0.3.1", features = ["codec"], optional = true }
 nom = { version = "5", optional = true }
 
 [dev-dependencies]
@@ -30,7 +30,6 @@ futures-executor = "0.3.4"
 hex = "0.4"
 rand = "0.7"
 quickcheck = "0.9"
-tokio-util = { version = "0.2", features = ["codec"] }
 
 [[bench]]
 name = "benchmark"
