@@ -12,9 +12,10 @@ edition = "2018"
 all-features = true
 
 [features]
-codec = ["bytes", "tokio-util"]
-futures = ["futures-io", "futures-util"]
-futures-codec = ["bytes", "futures_codec"]
+std = []
+codec = ["std", "bytes", "tokio-util"]
+futures = ["std", "futures-io", "futures-util"]
+futures-codec = ["std", "bytes", "futures_codec"]
 
 [dependencies]
 bytes = { version = "0.5.3", optional = true }

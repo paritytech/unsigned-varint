@@ -19,7 +19,7 @@
 
 //! Basic unsigned-varint decoding.
 
-use std::{self, fmt};
+use core::{self, fmt};
 
 /// Possible decoding errors.
 #[non_exhaustive]
@@ -40,6 +40,7 @@ impl fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 macro_rules! decode {

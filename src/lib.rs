@@ -21,8 +21,13 @@
 //! significant bit (MSB) in each byte indicates if another byte follows
 //! (MSB = 1), or not (MSB = 0).
 
+#![forbid(unsafe_code, unused_imports, unused_variables)]
+#![cfg_attr(not(feature = "std"), no_std)]
+
 pub mod decode;
 pub mod encode;
+
+#[cfg(feature = "std")]
 pub mod io;
 
 #[cfg(feature = "futures")]
