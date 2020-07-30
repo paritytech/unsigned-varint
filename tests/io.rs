@@ -19,10 +19,13 @@
 
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
-use unsigned_varint::{encode, io};
+use unsigned_varint::encode;
 
+#[cfg(feature = "std")]
 #[test]
 fn read_arbitrary() {
+    use unsigned_varint::io;
+
     fn property(n: RandomUvi) {
         let mut r = std::io::Cursor::new(n.bytes());
         match n {
@@ -90,6 +93,7 @@ enum RandomUvi {
 }
 
 impl RandomUvi {
+    #[cfg(feature = "std")]
     fn bytes(&self) -> &[u8] {
         match self {
             RandomUvi::U8(_,  v) => v,
