@@ -1,3 +1,11 @@
+# 0.5.0 [2020-07-31]
+
+- Add support for `no_std` (#32, #33).
+  A new feature flag `std` has been added. It is not enabled by default but
+  implicitly for `codec`, `futures` and `futures-codec` features. It must
+  be explicitly provided in the absence of those features if the `io` module
+  should be enabled.
+
 # 0.4.0 [2020-05-18]
 
 - Update `tokio-util` and `futures_codec` (#31).
