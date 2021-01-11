@@ -18,7 +18,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use quickcheck::{Arbitrary, Gen};
-use rand::Rng;
 use unsigned_varint::encode;
 
 #[cfg(feature = "std")]
@@ -107,8 +106,8 @@ impl RandomUvi {
 }
 
 impl Arbitrary for RandomUvi {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        let n: u128 = g.gen();
+    fn arbitrary(g: &mut Gen) -> Self {
+        let n: u128 = Arbitrary::arbitrary(g);
         match n % 6 {
             0 => {
                 let mut b = encode::u8_buffer();

@@ -29,8 +29,7 @@ nom = { version = "6", optional = true }
 criterion = "0.3"
 futures-executor = "0.3.4"
 hex = "0.4"
-rand = "0.8"
-quickcheck = "0.9"
+quickcheck = "1"
 
 [[bench]]
 name = "benchmark"
