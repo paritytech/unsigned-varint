@@ -105,7 +105,7 @@ fn various() {
 #[test]
 fn identity_codec() {
     use bytes::{Bytes, BytesMut};
-    use quickcheck::StdThreadGen;
+    use quickcheck::Gen;
     use tokio_util::codec::{Encoder, Decoder};
     use unsigned_varint::codec::UviBytes;
 
@@ -118,7 +118,7 @@ fn identity_codec() {
         input == codec.decode(&mut buffer).expect("Ok").expect("Some").freeze()
     }
 
-    QuickCheck::with_gen(StdThreadGen::new(512 * 1024))
+    QuickCheck::new().gen(Gen::new(512 * 1024))
         .quickcheck(prop as fn(Vec<u8>) -> bool)
 }
 
