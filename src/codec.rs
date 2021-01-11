@@ -103,7 +103,7 @@ pub struct UviBytes<T = Bytes> {
     varint_codec: Uvi<usize>,
     /// number of bytes expected in the current frame (for decoding only)
     len: Option<usize>,
-    // maximum permitted number of bytes per frame
+    /// maximum permitted number of bytes per frame
     max: usize,
     _ty: PhantomData<T>
 }
