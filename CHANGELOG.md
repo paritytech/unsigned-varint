@@ -1,3 +1,9 @@
+# 0.6.0 [unreleased]
+
+- Switch `futures_codec` to `asynchronous-codec`.
+
+- Upgrade dependencies.
+
 # 0.5.1 [2020-09-08]
 
 - Improve docs (#36).

@@ -33,7 +33,7 @@ pub mod io;
 #[cfg(feature = "futures")]
 pub mod aio;
 
-#[cfg(any(feature = "codec", feature = "futures-codec"))]
+#[cfg(any(feature = "codec", feature = "asynchronous_codec"))]
 pub mod codec;
 
 #[cfg(feature = "nom")]

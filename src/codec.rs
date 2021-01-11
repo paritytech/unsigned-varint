@@ -17,7 +17,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-//! `Encoder`/`Decoder` implementations for tokio or futures_codec.
+//! `Encoder`/`Decoder` implementations for tokio or asynchronous_codec.
 
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use crate::{encode, decode::{self, Error}};
@@ -67,8 +67,8 @@ macro_rules! encoder_decoder_impls {
             }
         }
 
-        #[cfg(feature = "futures-codec")]
-        impl futures_codec::Encoder for Uvi<$typ> {
+        #[cfg(feature = "asynchronous_codec")]
+        impl asynchronous_codec::Encoder for Uvi<$typ> {
             type Item = $typ;
             type Error = io::Error;
 
@@ -78,8 +78,8 @@ macro_rules! encoder_decoder_impls {
             }
         }
 
-        #[cfg(feature = "futures-codec")]
-        impl futures_codec::Decoder for Uvi<$typ> {
+        #[cfg(feature = "asynchronous_codec")]
+        impl asynchronous_codec::Decoder for Uvi<$typ> {
             type Item = $typ;
             type Error = io::Error;
 
@@ -181,8 +181,8 @@ impl<T> tokio_util::codec::Decoder for UviBytes<T> {
     }
 }
 
-#[cfg(feature = "futures-codec")]
-impl<T: Buf> futures_codec::Encoder for UviBytes<T> {
+#[cfg(feature = "asynchronous_codec")]
+impl<T: Buf> asynchronous_codec::Encoder for UviBytes<T> {
     type Item = T;
     type Error = io::Error;
 
@@ -191,8 +191,8 @@ impl<T: Buf> futures_codec::Encoder for UviBytes<T> {
     }
 }
 
-#[cfg(feature = "futures-codec")]
-impl<T> futures_codec::Decoder for UviBytes<T> {
+#[cfg(feature = "asynchronous_codec")]
+impl<T> asynchronous_codec::Decoder for UviBytes<T> {
     type Item = BytesMut;
     type Error = io::Error;
 
