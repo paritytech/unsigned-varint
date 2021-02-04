@@ -1,3 +1,7 @@
+# 0.7.0 [2021-02-04]
+
+- Update `asynchronous-codec` to `v0.6`.
+
 # 0.6.0 [2021-01-11]
 
 - Switch `futures_codec` to `asynchronous-codec`.
