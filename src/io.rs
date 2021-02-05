@@ -92,3 +92,12 @@ impl From<decode::Error> for ReadError {
         ReadError::Decode(e)
     }
 }
+
+impl Into<io::Error> for ReadError {
+    fn into(self) -> io::Error {
+        match self {
+            ReadError::Io(e) => e,
+            ReadError::Decode(e) => e.into(),
+        }
+    }
+}

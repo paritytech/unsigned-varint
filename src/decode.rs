@@ -23,7 +23,8 @@ use core::{self, fmt};
 
 /// Possible decoding errors.
 ///
-/// **Note**: The `std` feature is required for the `std::error::Error` impl.
+/// **Note**: The `std` feature is required for the `std::error::Error` impl and the conversion to
+/// `std::io::Error`.
 #[non_exhaustive]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
@@ -45,6 +46,17 @@ impl fmt::Display for Error {
 /// Only available when the feature `std` is present.
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
+
+/// Only available when the feature `std` is present.
+#[cfg(feature = "std")]
+impl Into<std::io::Error> for Error {
+    fn into(self) -> std::io::Error {
+        match self {
+            Error::Insufficient => std::io::ErrorKind::UnexpectedEof,
+            Error::Overflow => std::io::ErrorKind::InvalidData,
+        }.into()
+    }
+}
 
 macro_rules! decode {
     ($buf:expr, $max_bytes:expr, $typ:ident) => {{
