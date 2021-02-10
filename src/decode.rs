@@ -51,10 +51,11 @@ impl std::error::Error for Error {}
 #[cfg(feature = "std")]
 impl Into<std::io::Error> for Error {
     fn into(self) -> std::io::Error {
-        match self {
+        let kind = match self {
             Error::Insufficient => std::io::ErrorKind::UnexpectedEof,
             Error::Overflow => std::io::ErrorKind::InvalidData,
-        }.into()
+        };
+        std::io::Error::new(kind, self)
     }
 }
 
@@ -138,4 +139,3 @@ pub fn usize(buf: &[u8]) -> Result<(usize, &[u8]), Error> {
 pub fn usize(buf: &[u8]) -> Result<(usize, &[u8]), Error> {
     u32(buf).map(|(n, i)| (n as usize, i))
 }
-
