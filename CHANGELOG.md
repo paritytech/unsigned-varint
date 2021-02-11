@@ -1,3 +1,7 @@
+# 0.7.1 [unreleased]
+
+- Allow conversions from crate errors to std::io equivalents (#52).
+
 # 0.7.0 [2021-02-04]
 
 - Update `asynchronous-codec` to `v0.6`.
