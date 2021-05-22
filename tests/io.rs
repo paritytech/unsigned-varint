@@ -60,7 +60,7 @@ fn async_read_arbitrary() {
     quickcheck::quickcheck(property as fn(RandomUvi))
 }
 
-#[cfg(feature = "nom")]
+#[cfg(all(feature = "nom", feature = "std"))]
 #[test]
 fn nom_read_arbitrary() {
     use unsigned_varint::nom;
