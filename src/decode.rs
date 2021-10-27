@@ -31,14 +31,17 @@ pub enum Error {
     /// Not enough input bytes.
     Insufficient,
     /// Input bytes exceed maximum.
-    Overflow
+    Overflow,
+    /// Encoding is not minimal (has trailing zero bytes).
+    NotMinimal,
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Insufficient => f.write_str("not enough input bytes"),
-            Error::Overflow => f.write_str("input bytes exceed maximum")
+            Error::Overflow => f.write_str("input bytes exceed maximum"),
+            Error::NotMinimal => f.write_str("encoding is not minimal"),
         }
     }
 }
@@ -54,6 +57,7 @@ impl Into<std::io::Error> for Error {
         let kind = match self {
             Error::Insufficient => std::io::ErrorKind::UnexpectedEof,
             Error::Overflow => std::io::ErrorKind::InvalidData,
+            Error::NotMinimal => std::io::ErrorKind::InvalidData,
         };
         std::io::Error::new(kind, self)
     }
@@ -66,14 +70,19 @@ macro_rules! decode {
             let k = $typ::from(b & 0x7F);
             n |= k << (i * 7);
             if is_last(b) {
-                return Ok((n, &$buf[i+1..]))
+                if b == 0 && i > 0 {
+                    // If last byte (of a multi-byte varint) is zero, it could have been "more
+                    // minimally" encoded by dropping that trailing zero.
+                    return Err(Error::NotMinimal);
+                }
+                return Ok((n, &$buf[i + 1..]));
             }
             if i == $max_bytes {
-                return Err(Error::Overflow)
+                return Err(Error::Overflow);
             }
         }
         Err(Error::Insufficient)
-    }}
+    }};
 }
 
 /// Is this the last byte of an unsigned varint?
