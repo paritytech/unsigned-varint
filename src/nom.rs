@@ -32,6 +32,7 @@ macro_rules! gen {
                 let (n, remain) = decode::$type(input).map_err(|err| match err {
                     Error::Insufficient => NomErr::Incomplete(Needed::Unknown),
                     Error::Overflow => NomErr::Error((input, ErrorKind::TooLarge)),
+                    Error::NotMinimal => NomErr::Error((input, ErrorKind::Verify)),
                 })?;
                 Ok((remain, n))
             }
