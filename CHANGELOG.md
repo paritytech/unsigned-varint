@@ -1,6 +1,7 @@
-# 0.7.1 [unreleased]
+# 0.7.1 [2021-02-08]
 
 - Allow conversions from crate errors to std::io equivalents (#52).
+- Reject non-minimally encoded varints (additional non-significant zero bytes) (#56).
 
 # 0.7.0 [2021-02-04]
 
