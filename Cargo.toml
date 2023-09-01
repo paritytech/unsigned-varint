@@ -1,6 +1,6 @@
 [package]
 name = "unsigned-varint"
-version = "0.7.1"
+version = "0.7.2"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "MIT"
 description = "unsigned varint encoding"

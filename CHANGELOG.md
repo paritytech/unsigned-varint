@@ -1,3 +1,7 @@
+# 0.7.2 [2023-09-XX]
+
+- Update `tokio-util` to `0.7` (#59)
+
 # 0.7.1 [2021-02-08]
 
 - Allow conversions from crate errors to std::io equivalents (#52).
