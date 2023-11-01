@@ -1,4 +1,4 @@
-# 0.8.0 - unreleased
+# 0.8.0 - [2023-11-01]
 
 - Update `asynchronous-codec` to `0.7` (#71)
 
