@@ -18,50 +18,101 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use quickcheck::QuickCheck;
-use std::{u8, u16, u32, u64, u128};
-use unsigned_varint::{decode::{self, Error}, encode};
+use unsigned_varint::{
+    decode::{self, Error},
+    encode,
+};
 
 #[test]
 fn identity_u8() {
     let mut buf = encode::u8_buffer();
-    for n in 0 .. u8::MAX {
+    for n in 0..u8::MAX {
         assert_eq!(n, decode::u8(encode::u8(n, &mut buf)).unwrap().0)
+    }
+
+    let mut buf = encode::u16_buffer();
+
+    for n in ((u8::MAX as u16) +1)..u16::MAX {
+        let x = decode::u8(&encode::u16(n, &mut buf)[0..2]);
+        assert_eq!(x, Err(Error::Overflow));
     }
 }
 
 #[test]
 fn identity_u16() {
     let mut buf = encode::u16_buffer();
-    for n in 0 .. u16::MAX {
+    for n in 0..u16::MAX {
         assert_eq!(n, decode::u16(encode::u16(n, &mut buf)).unwrap().0)
+    }
+
+    let mut buf  = Vec::from(encode::u16(u16::MAX , &mut buf));
+    let last_byte = buf.len() - 1;
+    for i in buf[last_byte]+1..255 {
+        buf[last_byte] = i;
+        let y = decode::u16(&buf);
+        assert_eq!(y, Err(Error::Overflow));
     }
 }
 
 #[test]
 fn identity_u32() {
     let mut buf = encode::u32_buffer();
-    for n in 0 .. 1000_000 {
+    for n in 0..1000_000 {
         assert_eq!(n, decode::u32(encode::u32(n, &mut buf)).unwrap().0)
     }
-    assert_eq!(u32::MAX, decode::u32(encode::u32(u32::MAX, &mut buf)).unwrap().0)
+    assert_eq!(
+        u32::MAX,
+        decode::u32(encode::u32(u32::MAX, &mut buf)).unwrap().0
+    );
+
+    let mut buf  = Vec::from(encode::u32(u32::MAX , &mut buf));
+    let last_byte = buf.len() - 1;
+    for i in buf[last_byte]+1..255 {
+        buf[last_byte] = i;
+        let y = decode::u32(&buf);
+        assert_eq!(y, Err(Error::Overflow));
+    }
 }
 
 #[test]
 fn identity_u64() {
     let mut buf = encode::u64_buffer();
-    for n in 0 .. 1000_000 {
+    for n in 0..1000_000 {
         assert_eq!(n, decode::u64(encode::u64(n, &mut buf)).unwrap().0)
     }
-    assert_eq!(u64::MAX, decode::u64(encode::u64(u64::MAX, &mut buf)).unwrap().0)
+    assert_eq!(
+        u64::MAX,
+        decode::u64(encode::u64(u64::MAX, &mut buf)).unwrap().0
+    );
+
+    let mut buf  = Vec::from(encode::u64(u64::MAX , &mut buf));
+    let last_byte = buf.len() - 1;
+    for i in buf[last_byte]+1..255 {
+        buf[last_byte] = i;
+        let y = decode::u64(&buf);
+        assert_eq!(y, Err(Error::Overflow));
+    }
 }
 
 #[test]
 fn identity_u128() {
     let mut buf = encode::u128_buffer();
-    for n in 0 .. 1000_000 {
+    for n in 0..1000_000 {
         assert_eq!(n, decode::u128(encode::u128(n, &mut buf)).unwrap().0)
     }
-    assert_eq!(u128::MAX, decode::u128(encode::u128(u128::MAX, &mut buf)).unwrap().0)
+    assert_eq!(
+        u128::MAX,
+        decode::u128(encode::u128(u128::MAX, &mut buf)).unwrap().0
+    );
+
+    let mut buf  = Vec::from(encode::u128(u128::MAX , &mut buf));
+    let last_byte = buf.len() - 1;
+    for i in buf[last_byte]+1..255 {
+        buf[last_byte] = i;
+        let y = decode::u128(&buf);
+        assert_eq!(y, Err(Error::Overflow));
+    }
+
 }
 
 #[test]
@@ -75,6 +126,25 @@ fn identity() {
         .min_tests_passed(1_000_000)
         .max_tests(1_000_000)
         .quickcheck(prop as fn(u64) -> bool)
+}
+
+#[test]
+fn identity_decode() {
+    // Tests that if we decode a number, then encode it, we get the same bytes.
+    fn decode_encode_bytes(bytes: Vec<u8>) -> bool {
+        let n = decode::u64(&bytes);
+        if !n.is_ok() {
+            return true;
+        }
+        let mut buf = encode::u64_buffer();
+        let bytes2 = encode::u64(n.unwrap().0, &mut buf);
+        &bytes[0..bytes2.len()] == bytes2
+    }
+    QuickCheck::new()
+        .tests(1_000_000)
+        .min_tests_passed(1_000_000)
+        .max_tests(1_000_000)
+        .quickcheck(decode_encode_bytes as fn(Vec<u8>) -> bool)
 }
 
 #[test]
@@ -97,7 +167,9 @@ fn various() {
     );
     assert_eq!(
         0xFFFFFFFFFFFFFFFF,
-        decode::u64(&[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 1]).unwrap().0
+        decode::u64(&[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 1])
+            .unwrap()
+            .0
     )
 }
 
@@ -106,7 +178,7 @@ fn various() {
 fn identity_codec() {
     use bytes::{Bytes, BytesMut};
     use quickcheck::Gen;
-    use tokio_util::codec::{Encoder, Decoder};
+    use tokio_util::codec::{Decoder, Encoder};
     use unsigned_varint::codec::UviBytes;
 
     fn prop(mut xs: Vec<u8>) -> bool {
@@ -115,10 +187,15 @@ fn identity_codec() {
         let input = Bytes::from(xs);
         let mut buffer = BytesMut::with_capacity(input.len());
         assert!(codec.encode(input.clone(), &mut buffer).is_ok());
-        input == codec.decode(&mut buffer).expect("Ok").expect("Some").freeze()
+        input
+            == codec
+                .decode(&mut buffer)
+                .expect("Ok")
+                .expect("Some")
+                .freeze()
     }
 
-    QuickCheck::new().gen(Gen::new(512 * 1024))
+    QuickCheck::new()
+        .gen(Gen::new(512 * 1024))
         .quickcheck(prop as fn(Vec<u8>) -> bool)
 }
-

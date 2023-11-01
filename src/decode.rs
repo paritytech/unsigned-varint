@@ -68,6 +68,11 @@ macro_rules! decode {
         let mut n = 0;
         for (i, b) in $buf.iter().cloned().enumerate() {
             let k = $typ::from(b & 0x7F);
+            let total_bits = $typ::BITS as usize;
+            // Check that the last byte does not overflow
+            if (i * 7 + 7) > total_bits  && usize::from(b) >= (1 << (total_bits - i * 7)) {
+                return Err(Error::Overflow);
+            }
             n |= k << (i * 7);
             if is_last(b) {
                 if b == 0 && i > 0 {
