@@ -1,3 +1,7 @@
+# 0.8.0 - [2023-11-01]
+
+- Update `asynchronous-codec` to `0.7` (#71)
+
 # 0.7.2 [2023-09-XX]
 
 - Update `tokio-util` to `0.7` (#59)

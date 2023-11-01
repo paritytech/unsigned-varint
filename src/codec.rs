@@ -69,10 +69,10 @@ macro_rules! encoder_decoder_impls {
 
         #[cfg(feature = "asynchronous_codec")]
         impl asynchronous_codec::Encoder for Uvi<$typ> {
-            type Item = $typ;
+            type Item<'a> = $typ;
             type Error = io::Error;
 
-            fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+            fn encode(&mut self, item: Self::Item<'_>, dst: &mut BytesMut) -> Result<(), Self::Error> {
                 self.serialise(item, dst);
                 Ok(())
             }
@@ -183,10 +183,10 @@ impl<T> tokio_util::codec::Decoder for UviBytes<T> {
 
 #[cfg(feature = "asynchronous_codec")]
 impl<T: Buf> asynchronous_codec::Encoder for UviBytes<T> {
-    type Item = T;
+    type Item<'a> = T;
     type Error = io::Error;
 
-    fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+    fn encode(&mut self, item: Self::Item<'_>, dst: &mut BytesMut) -> Result<(), Self::Error> {
         self.serialise(item, dst)
     }
 }
