@@ -17,12 +17,12 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-//! Decode using [`futures_io::AsyncRead`] types.
+//! Decode using [`tokio::io::AsyncRead`] types.
 
 use crate::{decode, encode, io::ReadError};
-use futures_io::AsyncRead;
-use futures_util::io::AsyncReadExt;
 use std::io;
+use tokio::io::AsyncRead;
+use tokio::io::AsyncReadExt;
 
 macro_rules! gen {
     ($($name:ident, $d:expr, $t:ident, $b:ident);*) => {
@@ -55,4 +55,3 @@ gen! {
     read_u128,  "`u128`",  u128,  u128_buffer;
     read_usize, "`usize`", usize, usize_buffer
 }
-
