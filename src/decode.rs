@@ -23,8 +23,7 @@ use core::{self, fmt};
 
 /// Possible decoding errors.
 ///
-/// **Note**: The `std` feature is required for the `std::error::Error` impl and the conversion to
-/// `std::io::Error`.
+/// **Note**: The `std` feature is required for the conversion to `std::io::Error`.
 #[non_exhaustive]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
@@ -46,9 +45,7 @@ impl fmt::Display for Error {
     }
 }
 
-/// Only available when the feature `std` is present.
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
+impl core::error::Error for Error {}
 
 /// Only available when the feature `std` is present.
 #[cfg(feature = "std")]
