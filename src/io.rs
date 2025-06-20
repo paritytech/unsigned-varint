@@ -59,20 +59,20 @@ gen! {
 #[derive(Debug)]
 pub enum ReadError {
     Io(io::Error),
-    Decode(decode::Error)
+    Decode(decode::Error),
 }
 
 impl fmt::Display for ReadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ReadError::Io(e) => write!(f, "i/o error: {}", e),
-            ReadError::Decode(e) => write!(f, "decode error: {}", e)
+            ReadError::Decode(e) => write!(f, "decode error: {}", e),
         }
     }
 }
 
-impl std::error::Error for ReadError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl core::error::Error for ReadError {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         if let ReadError::Io(e) = self {
             Some(e)
         } else {
